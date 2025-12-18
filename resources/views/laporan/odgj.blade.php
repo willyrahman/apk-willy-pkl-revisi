@@ -23,10 +23,17 @@
                         <h4 class="card-title">Laporan Data ODGJ</h4>
                     </div>
                     <div class="card-body">
+                        {{-- FILTER --}}
                         <form action="{{ route('laporan.odgj') }}" method="GET" class="mb-4">
                             <div class="row align-items-end">
-                                <div class="col-md-3"><label>Tanggal Awal</label><input type="date" name="tgl_awal" class="form-control" value="{{ request('tgl_awal') }}"></div>
-                                <div class="col-md-3"><label>Tanggal Akhir</label><input type="date" name="tgl_akhir" class="form-control" value="{{ request('tgl_akhir') }}"></div>
+                                <div class="col-md-3">
+                                    <label>Tanggal Awal</label>
+                                    <input type="date" name="tgl_awal" class="form-control" value="{{ request('tgl_awal') }}">
+                                </div>
+                                <div class="col-md-3">
+                                    <label>Tanggal Akhir</label>
+                                    <input type="date" name="tgl_akhir" class="form-control" value="{{ request('tgl_akhir') }}">
+                                </div>
                                 <div class="col-md-6">
                                     <button type="submit" class="btn btn-primary btn-round mr-2">Filter</button>
                                     <a href="{{ route('laporan.odgj') }}" class="btn btn-warning btn-round mr-2">Reset</a>
@@ -35,6 +42,8 @@
                                 </div>
                             </div>
                         </form>
+
+                        {{-- TABEL DATA --}}
                         <div class="table-responsive">
                             <table class="table table-bordered">
                                 <thead class="text-primary">
@@ -58,7 +67,10 @@
                                         <td>{{ $item->nik }}</td>
                                         <td>{{ $item->nama }}</td>
                                         <td>{{ $item->jenis_kelamin }}</td>
-                                        <td>{{ $item->tanggal_lahir }}</td>
+
+                                        {{-- FORMAT TANGGAL INDONESIA --}}
+                                        <td>{{ \Carbon\Carbon::parse($item->tanggal_lahir)->translatedFormat('d F Y') }}</td>
+
                                         <td>{{ $item->alamat }}</td>
                                         <td>{{ $item->status_pasien }}</td>
                                         <td>{{ $item->diagnosis }}</td>

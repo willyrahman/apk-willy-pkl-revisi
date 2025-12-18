@@ -2,6 +2,12 @@
     {{-- ================= KOP SURAT (TEKS SAJA) ================= --}}
     <thead>
         <tr>
+            {{-- KOLOM LOGO (Merge 2 Kolom) --}}
+            <td colspan="2" rowspan="4" style="text-align: center; vertical-align: middle;">
+                {{-- Pastikan file 'logo.png' ada di public/images/ --}}
+                {{-- Kita gunakan asset() agar path-nya absolut (http://localhost/...) --}}
+                <img src="{{ asset('images/logo.png') }}" width="70" height="70" style="vertical-align: middle;">
+            </td>
             <td colspan="14" style="text-align: center; font-weight: bold; font-size: 14px;">
                 PEMERINTAH KOTA BANJARMASIN
             </td>

@@ -132,7 +132,7 @@
     <table class="kop-table">
         <tr>
             <td class="kop-logo">
-                <img src="{{ public_path('images/logo.png') }}" width="70px" height="auto">
+                <img src="{{ asset('images/logo.png') }}" width="70px" height="auto">
             </td>
             <td class="kop-text">
                 <h2>PEMERINTAH KOTA BANJARMASIN</h2>

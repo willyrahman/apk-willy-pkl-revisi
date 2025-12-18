@@ -58,7 +58,7 @@
                                         <thead class="text-primary">
                                             <tr>
                                                 <th class="text-center">No</th>
-                                                <th>No e-RM</th> {{-- KOLOM BARU --}}
+                                                <th>No e-RM</th>
                                                 <th>NIK</th>
                                                 <th>Nama Pasien</th>
                                                 <th>JK</th>
@@ -73,7 +73,7 @@
                                             @foreach($odgjs as $key => $item)
                                             <tr>
                                                 <td class="text-center">{{ $key + 1 }}</td>
-                                                <td><span class="badge badge-info">{{ $item->no_e_rekam_medis ?? '-' }}</span></td> {{-- DATA BARU --}}
+                                                <td><span class="badge badge-info">{{ $item->no_e_rekam_medis ?? '-' }}</span></td>
                                                 <td>{{ $item->nik }}</td>
                                                 <td>{{ $item->nama }}</td>
                                                 <td>{{ $item->jenis_kelamin }}</td>
@@ -94,7 +94,8 @@
                                                         data-erm="{{ $item->no_e_rekam_medis }}"
                                                         data-nama="{{ $item->nama }}"
                                                         data-jk="{{ $item->jenis_kelamin == 'L' ? 'Laki-laki' : 'Perempuan' }}"
-                                                        data-tgl="{{ \Carbon\Carbon::parse($item->tanggal_lahir)->format('d F Y') }}"
+                                                        {{-- FORMAT TANGGAL INDONESIA --}}
+                                                        data-tgl="{{ \Carbon\Carbon::parse($item->tanggal_lahir)->translatedFormat('d F Y') }}"
                                                         data-umur="{{ \Carbon\Carbon::parse($item->tanggal_lahir)->age }}"
                                                         data-alamat="{{ $item->alamat }}"
                                                         data-rt="{{ $item->rt }}"
@@ -300,7 +301,7 @@
     </div>
 
     <div class="modal fade" id="detailModal" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog" role="document">
+        <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-info text-white">
                     <h5 class="modal-title">Detail Pasien</h5>
@@ -315,7 +316,7 @@
                             <td>: <span id="d-nik"></span></td>
                         </tr>
                         <tr>
-                            <th>No e-RM</th> {{-- DETAIL BARU --}}
+                            <th>No e-RM</th>
                             <td>: <span id="d-erm"></span></td>
                         </tr>
                         <tr>
@@ -370,42 +371,43 @@
     <script src="{{ asset('assets/js/paper-dashboard.min.js?v=2.0.1') }}" type="text/javascript"></script>
 
     <script>
-        // 1. Script Detail Modal
-        $(document).on('click', '.btn-detail', function() {
-            $('#d-nik').text($(this).data('nik'));
-            $('#d-erm').text($(this).data('erm') || '-'); // Isi Detail ERM
-            $('#d-nama').text($(this).data('nama'));
-            $('#d-jk').text($(this).data('jk'));
-            $('#d-tgl').text($(this).data('tgl'));
-            $('#d-umur').text($(this).data('umur'));
-            $('#d-alamat').text($(this).data('alamat') + ' (RT ' + $(this).data('rt') + ')');
-            $('#d-status').text($(this).data('status'));
-            $('#d-diagnosis').text($(this).data('diagnosis'));
-            $('#d-kontrol').text($(this).data('kontrol'));
-            $('#d-ket').text($(this).data('ket'));
+        $(document).ready(function() {
+            // Script Detail Modal
+            $(document).on('click', '.btn-detail', function() {
+                $('#d-nik').text($(this).data('nik'));
+                $('#d-erm').text($(this).data('erm') || '-');
+                $('#d-nama').text($(this).data('nama'));
+                $('#d-jk').text($(this).data('jk'));
+                $('#d-tgl').text($(this).data('tgl'));
+                $('#d-umur').text($(this).data('umur'));
+                $('#d-alamat').text($(this).data('alamat') + ' (RT ' + $(this).data('rt') + ')');
+                $('#d-status').text($(this).data('status'));
+                $('#d-diagnosis').text($(this).data('diagnosis'));
+                $('#d-kontrol').text($(this).data('kontrol'));
+                $('#d-ket').text($(this).data('ket'));
+            });
+
+            // Script Edit Modal
+            $(document).on('click', '.btn-edit', function() {
+                let id = $(this).data('id');
+                let url = "{{ route('odgj.update', ':id') }}";
+                url = url.replace(':id', id);
+                $('#editForm').attr('action', url);
+
+                $('#edit_nik').val($(this).data('nik'));
+                $('#edit_erm').val($(this).data('erm'));
+                $('#edit_nama').val($(this).data('nama'));
+                $('#edit_jk').val($(this).data('jk'));
+                $('#edit_tgl').val($(this).data('tgl'));
+                $('#edit_alamat').val($(this).data('alamat'));
+                $('#edit_rt').val($(this).data('rt'));
+                $('#edit_status').val($(this).data('status'));
+                $('#edit_jadwal').val($(this).data('jadwal'));
+                $('#edit_diagnosis').val($(this).data('diagnosis'));
+                $('#edit_ket').val($(this).data('ket'));
+            });
         });
 
-        // 2. Script Edit Modal (Single Modal Logic)
-        $(document).on('click', '.btn-edit', function() {
-            let id = $(this).data('id');
-            let url = "{{ route('odgj.update', ':id') }}";
-            url = url.replace(':id', id);
-            $('#editForm').attr('action', url);
-
-            $('#edit_nik').val($(this).data('nik'));
-            $('#edit_erm').val($(this).data('erm')); // Isi Edit ERM
-            $('#edit_nama').val($(this).data('nama'));
-            $('#edit_jk').val($(this).data('jk'));
-            $('#edit_tgl').val($(this).data('tgl'));
-            $('#edit_alamat').val($(this).data('alamat'));
-            $('#edit_rt').val($(this).data('rt'));
-            $('#edit_status').val($(this).data('status'));
-            $('#edit_jadwal').val($(this).data('jadwal'));
-            $('#edit_diagnosis').val($(this).data('diagnosis'));
-            $('#edit_ket').val($(this).data('ket'));
-        });
-
-        // 3. Konfirmasi Hapus
         function confirmDelete(id) {
             Swal.fire({
                 title: 'Hapus Data?',

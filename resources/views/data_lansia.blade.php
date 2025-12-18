@@ -90,7 +90,7 @@
                                                 <th>Tgl Kunjungan</th>
                                                 <th>Nama Lansia</th>
                                                 <th>Umur</th>
-                                                <th>Link Hipertensi & No. RM</th> {{-- JUDUL KOLOM DIUPDATE --}}
+                                                <th>Link Hipertensi & No. RM</th>
                                                 <th>Alamat</th>
                                                 <th>BB (kg)</th>
                                                 <th>TB (cm)</th>
@@ -110,11 +110,11 @@
                                             <tr>
                                                 <td>{{ $index + 1 }}</td>
                                                 <td><span class="badge badge-info">{{ $item->no_e_rekam_medis ?? '-' }}</span></td>
-                                                <td>{{ \Carbon\Carbon::parse($item->tanggal_kunjungan)->format('d-m-Y') }}</td>
+                                                {{-- FORMAT TANGGAL DI TABEL --}}
+                                                <td>{{ \Carbon\Carbon::parse($item->tanggal_kunjungan)->translatedFormat('d F Y') }}</td>
                                                 <td class="text-left">{{ $item->nama_lengkap }}</td>
                                                 <td>{{ $item->umur }}</td>
 
-                                                {{-- KOLOM LINK HIPERTENSI DIPERBARUI --}}
                                                 <td>
                                                     <span class="font-weight-bold">{{ $item->hipertensi->nama_pasien ?? '-' }}</span>
                                                     @if(isset($item->hipertensi->no_e_rekam_medis))
@@ -151,14 +151,12 @@
                                                         data-nama="{{ $item->nama_lengkap }}"
                                                         data-nik="{{ $item->nik }}"
                                                         data-erm="{{ $item->no_e_rekam_medis }}"
-                                                        data-tgl="{{ \Carbon\Carbon::parse($item->tanggal_kunjungan)->format('d F Y') }}"
-                                                        data-ttl="{{ $item->tempat_lahir }}, {{ $item->tanggal_lahir }}"
+                                                        {{-- FORMAT TANGGAL DI TOMBOL DETAIL --}}
+                                                        data-tgl="{{ \Carbon\Carbon::parse($item->tanggal_kunjungan)->translatedFormat('d F Y') }}"
+                                                        data-ttl="{{ $item->tempat_lahir }}, {{ \Carbon\Carbon::parse($item->tanggal_lahir)->translatedFormat('d F Y') }}"
                                                         data-umur="{{ $item->umur }}"
                                                         data-jk="{{ $item->jenis_kelamin == 'L' ? 'Laki-laki' : 'Perempuan' }}"
-
-                                                        {{-- Mengirim data link hipertensi dan RM ke modal detail --}}
                                                         data-link="{{ $item->hipertensi->nama_pasien ?? 'Tidak Terhubung' }} {{ isset($item->hipertensi->no_e_rekam_medis) ? '(RM: '.$item->hipertensi->no_e_rekam_medis.')' : '' }}"
-
                                                         data-alamat="{{ $item->alamat }} (Kel. {{ $item->kelurahan }})"
                                                         data-bb="{{ $item->berat_badan }}"
                                                         data-tb="{{ $item->tinggi_badan }}"
@@ -188,6 +186,7 @@
                                                         data-nik="{{ $item->nik }}"
                                                         data-erm="{{ $item->no_e_rekam_medis }}"
                                                         data-hipertensi="{{ $item->hipertensi_id }}"
+                                                        {{-- FORMAT TANGGAL DI TOMBOL EDIT (TETAP Y-m-d UNTUK INPUT DATE) --}}
                                                         data-tgl_kunjungan="{{ $item->tanggal_kunjungan }}"
                                                         data-umur="{{ $item->umur }}"
                                                         data-alamat="{{ $item->alamat }}"
@@ -248,9 +247,10 @@
                 <form action="{{ route('lansia.store') }}" method="POST">
                     @csrf
                     <div class="modal-body">
+                        {{-- Isi Modal Tambah Tetap Sama --}}
                         <div class="form-group">
                             <label>No e-Rekam Medis (Lansia)</label>
-                            <input type="text" class="form-control" name="no_e_rekam_medis" placeholder="Nomor RM Elektronik">
+                            <input type="text" class="form-control" name="no_e_rekam_medis" placeholder="Opsional">
                         </div>
                         <div class="row">
                             <div class="col-md-6">
