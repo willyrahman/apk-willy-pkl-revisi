@@ -23,5 +23,6 @@ class Odgj extends Model
         'diagnosis',
         'keterangan',
         'no_e_rekam_medis',
+        'tanggal_kontrol',
     ];
 }

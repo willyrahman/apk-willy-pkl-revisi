@@ -62,12 +62,13 @@
                                         <thead class="text-primary">
                                             <th class="text-center">No</th>
                                             <th>No e-RM</th>
-                                            <th>Nama Ibu</th>
-                                            <th>Nama Suami</th>
+                                            <th class="text-center">Tanggal Pemeriksaan K6</th>
+                                            <th>Nama Ibu Hamil</th>
                                             <th class="text-center">Tgl Lahir</th>
                                             <th class="text-center">NIK</th>
+                                            <th>Nama Suami</th>
                                             <th>Alamat</th>
-                                            <th class="text-center">Pemeriksaan K6</th>
+
                                             <th class="text-center">Jaminan</th>
                                             <th class="text-center">Aksi</th>
                                         </thead>
@@ -76,12 +77,6 @@
                                             <tr>
                                                 <td class="text-center">{{ $index + 1 }}</td>
                                                 <td><span class="badge badge-info">{{ $ibuhamil->no_e_rekam_medis ?? '-' }}</span></td>
-                                                <td>{{ $ibuhamil->nama_ibu }}</td>
-                                                <td>{{ $ibuhamil->nama_suami }}</td>
-                                                {{-- FORMAT TANGGAL INDONESIA --}}
-                                                <td class="text-center">{{ \Carbon\Carbon::parse($ibuhamil->tanggal_lahir)->translatedFormat('d F Y') }}</td>
-                                                <td class="text-center">{{ $ibuhamil->nik }}</td>
-                                                <td>{{ Str::limit($ibuhamil->alamat, 20) }}</td>
                                                 <td class="text-center">
                                                     @if($ibuhamil->tgl_pemeriksaan_k6)
                                                     {{ \Carbon\Carbon::parse($ibuhamil->tgl_pemeriksaan_k6)->translatedFormat('d F Y') }}
@@ -89,6 +84,13 @@
                                                     <span class="badge badge-warning">Belum</span>
                                                     @endif
                                                 </td>
+                                                <td>{{ $ibuhamil->nama_ibu }}</td>
+                                                {{-- FORMAT TANGGAL INDONESIA --}}
+                                                <td class="text-center">{{ \Carbon\Carbon::parse($ibuhamil->tanggal_lahir)->translatedFormat('d F Y') }}</td>
+                                                <td class="text-center">{{ $ibuhamil->nik }}</td>
+                                                <td>{{ $ibuhamil->nama_suami }}</td>
+                                                <td>{{ Str::limit($ibuhamil->alamat, 20) }}</td>
+
                                                 <td class="text-center">{{ $ibuhamil->jaminan_kesehatan }}</td>
                                                 <td class="text-center">
                                                     {{-- TOMBOL DETAIL --}}

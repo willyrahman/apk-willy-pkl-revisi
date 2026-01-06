@@ -59,13 +59,17 @@
                                             <tr>
                                                 <th class="text-center">No</th>
                                                 <th>No e-RM</th>
-                                                <th>NIK</th>
                                                 <th>Nama Pasien</th>
-                                                <th>JK</th>
-                                                <th>Umur</th>
+                                                <th>Jenis Kelamin</th>
                                                 <th>Alamat</th>
-                                                <th>Status</th>
+                                                <th>Rt</th>
+                                                <th>Tanggal Lahir/Umur</th>
+                                                <th>NIK</th>
+                                                <th>Lama/Baru</th>
+                                                <th>Diagnosis</th>
                                                 <th>Jadwal Kontrol</th>
+                                                <th>Keterangan</th>
+                                                <th>Tanggal Kontrol</th>
                                                 <th class="text-center">Aksi</th>
                                             </tr>
                                         </thead>
@@ -74,17 +78,23 @@
                                             <tr>
                                                 <td class="text-center">{{ $key + 1 }}</td>
                                                 <td><span class="badge badge-info">{{ $item->no_e_rekam_medis ?? '-' }}</span></td>
-                                                <td>{{ $item->nik }}</td>
                                                 <td>{{ $item->nama }}</td>
                                                 <td>{{ $item->jenis_kelamin }}</td>
-                                                <td>{{ \Carbon\Carbon::parse($item->tanggal_lahir)->age }} Thn</td>
                                                 <td>{{ Str::limit($item->alamat, 15) }}</td>
+                                                <td>{{ $item->rt }}</td>
+                                                <td>{{ \Carbon\Carbon::parse($item->tanggal_lahir)->age }} Thn/ {{ \Carbon\Carbon::parse($item->tanggal_lahir)->translatedFormat('d F Y') }}</td>
+                                                <td>{{ $item->nik }}</td>
                                                 <td>
                                                     <span class="badge {{ $item->status_pasien == 'Baru' ? 'badge-success' : 'badge-info' }}">
                                                         {{ $item->status_pasien }}
                                                     </span>
                                                 </td>
+                                                <td>{{ $item->diagnosis }}</td>
                                                 <td>{{ $item->jadwal_kontrol }}</td>
+                                                <td>{{ $item->keterangan }}</td>
+
+                                                <td>{{ $item->tanggal_kontrol ? \Carbon\Carbon::parse($item->tanggal_kontrol)->translatedFormat('d F Y') : '-' }}</td>
+
                                                 <td class="text-center">
                                                     {{-- TOMBOL DETAIL --}}
                                                     <button class="btn btn-info btn-sm btn-detail"
@@ -94,7 +104,6 @@
                                                         data-erm="{{ $item->no_e_rekam_medis }}"
                                                         data-nama="{{ $item->nama }}"
                                                         data-jk="{{ $item->jenis_kelamin == 'L' ? 'Laki-laki' : 'Perempuan' }}"
-                                                        {{-- FORMAT TANGGAL INDONESIA --}}
                                                         data-tgl="{{ \Carbon\Carbon::parse($item->tanggal_lahir)->translatedFormat('d F Y') }}"
                                                         data-umur="{{ \Carbon\Carbon::parse($item->tanggal_lahir)->age }}"
                                                         data-alamat="{{ $item->alamat }}"
@@ -102,7 +111,9 @@
                                                         data-status="{{ $item->status_pasien }}"
                                                         data-diagnosis="{{ $item->diagnosis }}"
                                                         data-kontrol="{{ $item->jadwal_kontrol }}"
-                                                        data-ket="{{ $item->keterangan }}">
+                                                        data-ket="{{ $item->keterangan }}"
+                                                        /* PERUBAHAN 3: Menambah Data Attribute Tanggal Kontrol */
+                                                        data-tgl-kontrol="{{ $item->tanggal_kontrol ? \Carbon\Carbon::parse($item->tanggal_kontrol)->translatedFormat('d F Y') : '-' }}">
                                                         <i class="fa fa-info-circle"></i>
                                                     </button>
 
@@ -121,7 +132,9 @@
                                                         data-status="{{ $item->status_pasien }}"
                                                         data-jadwal="{{ $item->jadwal_kontrol }}"
                                                         data-diagnosis="{{ $item->diagnosis }}"
-                                                        data-ket="{{ $item->keterangan }}">
+                                                        data-ket="{{ $item->keterangan }}"
+                                                        /* PERUBAHAN 4: Menambah Data Attribute Tanggal Kontrol (Raw format Y-m-d untuk input date) */
+                                                        data-tgl-kontrol="{{ $item->tanggal_kontrol }}">
                                                         <i class="fa fa-edit"></i>
                                                     </button>
 
@@ -202,7 +215,7 @@
                                 </div>
                             </div>
                             <div class="col-md-6">
-                                <div class="form-group"><label>Jadwal Kontrol</label>
+                                <div class="form-group"><label>Jadwal Kontrol (Bulan)</label>
                                     <select class="form-control" name="jadwal_kontrol" required>
                                         <option value="">Pilih Bulan</option>
                                         @foreach(['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'] as $bulan)
@@ -214,6 +227,12 @@
                         </div>
                         <div class="form-group"><label>Diagnosis</label><input type="text" class="form-control" name="diagnosis"></div>
                         <div class="form-group"><label>Keterangan</label><textarea class="form-control" name="keterangan" rows="2"></textarea></div>
+
+                        <div class="form-group">
+                            <label>Tanggal Kontrol</label>
+                            <input type="date" class="form-control" name="tanggal_kontrol">
+                        </div>
+
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
@@ -279,7 +298,7 @@
                                 </div>
                             </div>
                             <div class="col-md-6">
-                                <div class="form-group"><label>Jadwal Kontrol</label>
+                                <div class="form-group"><label>Jadwal Kontrol (Bulan)</label>
                                     <select class="form-control" id="edit_jadwal" name="jadwal_kontrol" required>
                                         @foreach(['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'] as $bulan)
                                         <option value="{{ $bulan }}">{{ $bulan }}</option>
@@ -290,6 +309,11 @@
                         </div>
                         <div class="form-group"><label>Diagnosis</label><input type="text" class="form-control" id="edit_diagnosis" name="diagnosis"></div>
                         <div class="form-group"><label>Keterangan</label><textarea class="form-control" id="edit_ket" name="keterangan" rows="2"></textarea></div>
+
+                        <div class="form-group">
+                            <label>Tanggal Kontrol</label>
+                            <input type="date" class="form-control" id="edit_tgl_kontrol" name="tanggal_kontrol">
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
@@ -355,6 +379,10 @@
                             <th>Keterangan</th>
                             <td>: <span id="d-ket"></span></td>
                         </tr>
+                        <tr>
+                            <th>Tanggal Kontrol</th>
+                            <td>: <span id="d-tgl-kontrol"></span></td>
+                        </tr>
                     </table>
                 </div>
                 <div class="modal-footer">
@@ -385,6 +413,9 @@
                 $('#d-diagnosis').text($(this).data('diagnosis'));
                 $('#d-kontrol').text($(this).data('kontrol'));
                 $('#d-ket').text($(this).data('ket'));
+
+                // PERUBAHAN 8: Set text Tanggal Kontrol di Detail Modal
+                $('#d-tgl-kontrol').text($(this).data('tgl-kontrol'));
             });
 
             // Script Edit Modal
@@ -405,6 +436,9 @@
                 $('#edit_jadwal').val($(this).data('jadwal'));
                 $('#edit_diagnosis').val($(this).data('diagnosis'));
                 $('#edit_ket').val($(this).data('ket'));
+
+                // PERUBAHAN 9: Set value Tanggal Kontrol di Edit Modal
+                $('#edit_tgl_kontrol').val($(this).data('tgl-kontrol'));
             });
         });
 

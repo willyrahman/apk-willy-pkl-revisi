@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Odgj;
+use PDF; // Pastikan library PDF dipanggil (barryvdh/laravel-dompdf)
 use Illuminate\Http\Request;
 
 class OdgjController extends Controller
@@ -35,6 +36,7 @@ class OdgjController extends Controller
             'jadwal_kontrol' => 'required|string',
             'diagnosis' => 'nullable|string',
             'keterangan' => 'nullable|string',
+            'tanggal_kontrol' => 'nullable|date',
             'no_e_rekam_medis' => 'nullable|string|max:100',
         ]);
 
@@ -68,6 +70,7 @@ class OdgjController extends Controller
             'jadwal_kontrol' => 'required|string',
             'diagnosis' => 'nullable|string',
             'keterangan' => 'nullable|string',
+            'tanggal_kontrol' => 'nullable|date',
             'no_e_rekam_medis' => 'nullable|string|max:100',
         ]);
 
@@ -92,5 +95,28 @@ class OdgjController extends Controller
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Gagal menghapus data: ' . $e->getMessage());
         }
+    }
+
+    public function cetakPdf(Request $request)
+    {
+        // 1. AMBIL INPUT TANGGAL DARI FORM
+        $tgl_awal = $request->tgl_awal;
+        $tgl_akhir = $request->tgl_akhir;
+
+        // 2. QUERY DATA
+        $query = Odgj::query();
+
+        // Jika user memfilter tanggal, lakukan filter query
+        if ($tgl_awal && $tgl_akhir) {
+            $query->whereBetween('tanggal_kontrol', [$tgl_awal, $tgl_akhir]);
+        }
+
+        $data = $query->orderBy('tanggal_kontrol', 'desc')->get();
+        $judul = 'Laporan Data Pasien ODGJ';
+
+        // 3. LOAD PDF (PENTING: Pastikan $tgl_awal dan $tgl_akhir masuk ke compact)
+        $pdf = PDF::loadView('laporan_pdf', compact('data', 'judul', 'tgl_awal', 'tgl_akhir'));
+
+        return $pdf->stream('laporan_odgj.pdf');
     }
 }

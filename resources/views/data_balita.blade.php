@@ -305,6 +305,8 @@
                             </div>
                         </div>
                         <div class="form-group"><label>Alamat</label><textarea name="alamat" class="form-control" rows="2"></textarea></div>
+                        <div class="form-group"><label>Poli</label><input type="text" name="poli_ruangan" class="form-control" required></div>
+                        <div class="form-group"><label>Dokter</label><input type="text" name="dokter-tenaga_medis" class="form-control" required></div>
                         <div class="row bg-light p-2 mx-1 mb-3 border rounded">
                             <div class="col-md-3">
                                 <div class="form-group"><label>Berat (Kg)</label><input type="number" step="0.1" name="berat_badan" id="add_berat" class="form-control" oninput="calcIMT('add')" required></div>

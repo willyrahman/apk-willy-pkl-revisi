@@ -131,10 +131,11 @@
                                             <tr>
                                                 <th>No</th>
                                                 <th>No e-RM</th>
-                                                <th>Tanggal</th>
+                                                <th>Tanggal Periksa</th>
                                                 <th>Nama Pasien</th>
                                                 <th>NIK</th>
                                                 <th>JK</th>
+                                                <th>No Telpon</th>
                                                 <th>Alamat</th>
                                                 <th>No. Asuransi</th>
                                                 <th>Skala Nyeri</th>
@@ -152,6 +153,7 @@
                                                 <td class="text-left">{{ $item->nama_pasien }}</td>
                                                 <td>{{ $item->nik }}</td>
                                                 <td>{{ $item->jenis_kelamin }}</td>
+                                                <td>{{ $item->no_telp }}</td>
                                                 <td>{{ Str::limit($item->alamat, 15) }}</td>
                                                 <td>{{ $item->no_asuransi ?? '-' }}</td>
                                                 <td>{{ $item->skala_nyeri }}</td>
@@ -238,7 +240,7 @@
                         </div>
                         <div class="row">
                             <div class="col-md-4">
-                                <div class="form-group"><label>Tanggal</label><input type="date" name="tanggal" class="form-control" required></div>
+                                <div class="form-group"><label>Tanggal Periksa</label><input type="date" name="tanggal" class="form-control" required></div>
                             </div>
                             <div class="col-md-8">
                                 <div class="form-group"><label>Nama Pasien</label><input type="text" name="nama_pasien" class="form-control" required></div>
@@ -320,7 +322,7 @@
                         </div>
                         <div class="row">
                             <div class="col-md-4">
-                                <div class="form-group"><label>Tanggal</label><input type="date" name="tanggal" id="edit_tanggal" class="form-control" required></div>
+                                <div class="form-group"><label>Tanggal Periksa</label><input type="date" name="tanggal" id="edit_tanggal" class="form-control" required></div>
                             </div>
                             <div class="col-md-8">
                                 <div class="form-group"><label>Nama Pasien</label><input type="text" name="nama_pasien" id="edit_nama" class="form-control" required></div>

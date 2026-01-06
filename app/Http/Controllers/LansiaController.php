@@ -13,13 +13,14 @@ class LansiaController extends Controller
      */
     public function index()
     {
-        // Eager load relasi hipertensi untuk performa query
+        // Eager load relasi hipertensi untuk performa query yang lebih cepat
         $lansias = Lansia::with('hipertensi')->orderBy('tanggal_kunjungan', 'desc')->get();
 
         // Data untuk dropdown di modal tambah/edit
-        $data_hipertensi = Hipertensi::orderBy('nama_pasien', 'asc')->get();
+        // PENTING: Nama variabel ini harus sama dengan yang ada di View (@foreach($hipertensis ...))
+        $hipertensis = Hipertensi::orderBy('nama_pasien', 'asc')->get();
 
-        return view('data_lansia', compact('lansias', 'data_hipertensi'));
+        return view('data_lansia', compact('lansias', 'hipertensis'));
     }
 
     /**
@@ -27,10 +28,10 @@ class LansiaController extends Controller
      */
     public function store(Request $request)
     {
-        // 1. Validasi Input (Lengkap sesuai form)
+        // 1. Validasi Input
         $validatedData = $request->validate([
-            'no_e_rekam_medis' => 'nullable|string|max:100', // Kolom Baru
-            'hipertensi_id' => 'nullable|exists:hipertensis,id', // Validasi relasi
+            'no_e_rekam_medis' => 'nullable|string|max:100',
+            'hipertensi_id' => 'nullable|exists:hipertensis,id', // Validasi Relasi
             'tanggal_kunjungan' => 'required|date',
             'nik' => 'required|numeric|digits_between:10,20',
             'nama_lengkap' => 'required|string|max:255',
@@ -41,7 +42,7 @@ class LansiaController extends Controller
             'alamat' => 'nullable|string',
             'kelurahan' => 'nullable|string',
 
-            // Data Fisik (Wajib untuk hitung IMT)
+            // Fisik
             'berat_badan' => 'required|numeric',
             'tinggi_badan' => 'required|numeric',
             'lingkar_perut' => 'nullable|numeric',
@@ -52,7 +53,7 @@ class LansiaController extends Controller
             'gds' => 'nullable|integer',
             'kolesterol' => 'nullable|integer',
 
-            // Screening (4 Kolom Baru & Lainnya)
+            // Screening & Gaya Hidup
             'merokok' => 'nullable|string',
             'depresi' => 'nullable|string',
             'kurang_makan_sayur_buah' => 'nullable|string',
@@ -67,14 +68,12 @@ class LansiaController extends Controller
         ]);
 
         try {
-            // 2. Hitung Ulang IMT & Status Gizi di Server
+            // 2. Hitung Otomatis IMT & Status Gizi di Server
             $hasilHitung = $this->hitungIMT($request->berat_badan, $request->tinggi_badan);
-
-            // 3. Masukkan hasil hitungan ke dalam array data
             $validatedData['imt'] = $hasilHitung['imt'];
             $validatedData['status_gizi'] = $hasilHitung['status_gizi'];
 
-            // 4. Simpan ke Database
+            // 3. Simpan ke Database
             Lansia::create($validatedData);
 
             return redirect()->route('lansia.index')->with('success', 'Data Lansia berhasil ditambahkan!');
@@ -93,7 +92,7 @@ class LansiaController extends Controller
         // 1. Validasi Input
         $validatedData = $request->validate([
             'no_e_rekam_medis' => 'nullable|string|max:100',
-            'hipertensi_id' => 'nullable|exists:hipertensis,id',
+            'hipertensi_id' => 'nullable|exists:hipertensis,id', // Validasi Relasi
             'tanggal_kunjungan' => 'required|date',
             'nik' => 'required|numeric',
             'nama_lengkap' => 'required|string|max:255',
@@ -122,7 +121,7 @@ class LansiaController extends Controller
         ]);
 
         try {
-            // 2. Hitung ulang IMT jika berat/tinggi diubah
+            // 2. Hitung Ulang IMT jika diedit
             $hasilHitung = $this->hitungIMT($request->berat_badan, $request->tinggi_badan);
             $validatedData['imt'] = $hasilHitung['imt'];
             $validatedData['status_gizi'] = $hasilHitung['status_gizi'];
@@ -150,19 +149,15 @@ class LansiaController extends Controller
     }
 
     /**
-     * Fungsi Private untuk Menghitung IMT dan Status Gizi
+     * Helper: Hitung IMT
      */
     private function hitungIMT($berat, $tinggi)
     {
         if ($berat > 0 && $tinggi > 0) {
-            // Konversi tinggi cm ke meter
             $tinggiMeter = $tinggi / 100;
-
-            // Rumus IMT: Berat / (Tinggi x Tinggi)
             $imt = $berat / ($tinggiMeter * $tinggiMeter);
-            $imt = round($imt, 2); // Bulatkan 2 desimal
+            $imt = round($imt, 2);
 
-            // Tentukan Status Gizi
             $status = "";
             if ($imt < 18.5) {
                 $status = "Kurus (Kekurangan berat badan)";
@@ -174,15 +169,8 @@ class LansiaController extends Controller
                 $status = "Obesitas (Kelebihan berat badan berat)";
             }
 
-            return [
-                'imt' => $imt,
-                'status_gizi' => $status
-            ];
+            return ['imt' => $imt, 'status_gizi' => $status];
         }
-
-        return [
-            'imt' => 0,
-            'status_gizi' => '-'
-        ];
+        return ['imt' => 0, 'status_gizi' => '-'];
     }
 }
