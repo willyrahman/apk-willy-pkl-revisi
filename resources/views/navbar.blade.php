@@ -2,15 +2,44 @@
   <div class="container-fluid">
     <div class="navbar-wrapper">
       <div class="navbar-toggle">
-        {{-- TOMBOL TOGGLE SIDEBAR (Disesuaikan) --}}
-        {{-- Menambahkan onclick untuk toggle class 'sidebar-closed' di body --}}
         <button type="button" class="navbar-toggler" onclick="document.body.classList.toggle('sidebar-closed')">
           <span class="navbar-toggler-bar bar1"></span>
           <span class="navbar-toggler-bar bar2"></span>
           <span class="navbar-toggler-bar bar3"></span>
         </button>
       </div>
-      <a class="navbar-brand" href="javascript:;">Dashboard</a>
+
+      {{-- LOGIKA DINAMIS UNTUK JUDUL NAVBAR --}}
+      <a class="navbar-brand" href="javascript:;">
+        @if(request()->routeIs('ibuHamil.*'))
+        Data Ibu Hamil
+        @elseif(request()->routeIs('lansia.*'))
+        Data Lansia
+        @elseif(request()->routeIs('odgj.*'))
+        Data Pasien ODGJ
+        @elseif(request()->routeIs('hipertensi.*'))
+        Data Pasien Hipertensi
+        @elseif(request()->routeIs('balita.*'))
+        Data Balita
+        @elseif(request()->routeIs('petugas.*'))
+        Manajemen Petugas
+        {{-- LOGIKA KHUSUS UNTUK SUB-MENU LAPORAN --}}
+        @elseif(request()->routeIs('laporan.ibuHamil'))
+        Laporan Ibu Hamil
+        @elseif(request()->routeIs('laporan.odgj'))
+        Laporan ODGJ
+        @elseif(request()->routeIs('laporan.hipertensi'))
+        Laporan Hipertensi
+        @elseif(request()->routeIs('laporan.balita'))
+        Laporan Balita
+        @elseif(request()->routeIs('laporan.lansia'))
+        Laporan Lansia
+        @elseif(request()->routeIs('laporan.*'))
+        Laporan Sistem
+        @else
+        Dashboard
+        @endif
+      </a>
     </div>
 
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navigation" aria-controls="navigation-index" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,17 +63,13 @@
         <li class="nav-item">
           <a class="nav-link btn-magnify" href="javascript:;">
             <i class="nc-icon nc-layout-11"></i>
-            <p>
-              <span class="d-lg-none d-md-block">Stats</span>
-            </p>
+            <p><span class="d-lg-none d-md-block">Stats</span></p>
           </a>
         </li>
         <li class="nav-item btn-rotate dropdown">
-          <a class="nav-link dropdown-toggle" href="http://example.com" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             <i class="nc-icon nc-bell-55"></i>
-            <p>
-              <span class="d-lg-none d-md-block">Some Actions</span>
-            </p>
+            <p><span class="d-lg-none d-md-block">Some Actions</span></p>
           </a>
           <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
             <a class="dropdown-item" href="#">Action</a>
@@ -53,24 +78,18 @@
           </div>
         </li>
 
-        {{-- Account Section --}}
         <li class="nav-item">
           <a class="nav-link btn-rotate" href="javascript:;">
             <i class="nc-icon nc-single-02"></i>
-            <p>
-              <span class="d-lg-none d-md-block">Account</span>
-            </p>
+            <p><span class="d-lg-none d-md-block">Account</span></p>
           </a>
         </li>
 
-        {{-- Logout Button --}}
         <li class="nav-item">
           <a class="nav-link btn-rotate text-danger" href="{{ route('logout') }}"
             onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
             <i class="nc-icon nc-button-power"></i>
-            <p>
-              <span class="d-lg-none d-md-block">Logout</span>
-            </p>
+            <p><span class="d-lg-none d-md-block">Logout</span></p>
           </a>
           <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
             @csrf

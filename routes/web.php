@@ -9,56 +9,52 @@ use App\Http\Controllers\RecapController;
 use App\Http\Controllers\IbuHamilController;
 use App\Http\Controllers\OdgjController;
 use App\Http\Controllers\HipertensiController;
-use App\Http\Controllers\BalitaController; // <--- PENTING: Tambahkan Import Ini
+use App\Http\Controllers\BalitaController;
 use App\Http\Controllers\LansiaController;
 use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\PetugasController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
-// Rute Login & Logout
+// ====================================================
+// 1. RUTE AUTH (Login & Logout)
+// ====================================================
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-// Pengalihan Berdasarkan Role
+// ====================================================
+// 2. RUTE PENGALIHAN (Redirect setelah Login)
+// ====================================================
 Route::get('/home', function () {
-    if (Auth::user()->role == 'admin') {
-        return redirect('/dashboard');
-    } elseif (Auth::user()->role == 'operator') {
-        return redirect('/scan');
+    $role = Auth::user()->role;
+
+    // Jika Operator (Scan), arahkan ke halaman scan
+    if ($role == 'operator') {
+        return redirect()->route('scan');
     }
-    return redirect('/');
+
+    // Admin, Petugas, Kepala semuanya masuk ke Dashboard
+    return redirect()->route('dashboard.index');
 })->middleware('auth');
 
 Route::get('/', [DashboardController::class, 'index'])->middleware('auth');
 
-// Grup Middleware Auth
+// ====================================================
+// 3. GRUP UTAMA (Bisa diakses SEMUA User Login)
+// ====================================================
 Route::middleware(['auth'])->group(function () {
+
+    // --- MENU UMUM (Dashboard & Data Pasien) ---
+    // Admin, Petugas, Kepala BISA akses ini
     Route::resource('dashboard', DashboardController::class);
-
-    // --- MODIFIKASI MENU UTAMA ---
-
-    // 1. Menu Ibu Hamil
     Route::resource('ibuHamil', IbuHamilController::class);
-
-    // 2. Menu ODGJ
     Route::resource('odgj', OdgjController::class);
-
-    // 3. Menu Hipertensi
     Route::resource('hipertensi', HipertensiController::class);
-
-    // 4. Menu Balita (PERBAIKAN: DITAMBAHKAN DI SINI)
-    // Ini akan membuat route: balita.index, balita.store, balita.update, balita.destroy
     Route::resource('balita', BalitaController::class);
-    // 5. Menu Lansia
     Route::resource('lansia', LansiaController::class);
 
-    Route::middleware(['is_admin'])->group(function () {
-        Route::resource('petugas', PetugasController::class);
-    });
-
-    // 6. Menu Laporan
+    // --- MENU LAPORAN ---
     Route::prefix('laporan')->name('laporan.')->group(function () {
         Route::get('/ibu-hamil', [LaporanController::class, 'ibuHamil'])->name('ibuHamil');
         Route::get('/odgj', [LaporanController::class, 'odgj'])->name('odgj');
@@ -70,9 +66,24 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/export/excel/{jenis}', [LaporanController::class, 'exportExcel'])->name('export.excel');
     });
 
-    // -------------------------------
+    // ====================================================
+    // 4. RUTE KHUSUS ADMIN (Hanya Admin)
+    // ====================================================
+    // Petugas & Kepala AKAN DITOLAK jika mencoba akses ini
+    Route::middleware(['is_admin'])->group(function () {
+        Route::resource('petugas', PetugasController::class);
+    });
 
-    // Route operasional scan (tetap dipertahankan jika masih dipakai)
+    // ====================================================
+    // 5. RUTE KHUSUS KEPALA (Hanya Kepala)
+    // ====================================================
+    Route::middleware(['is_kepala'])->group(function () {
+        Route::get('/laporan/persetujuan', [LaporanController::class, 'persetujuan'])->name('laporan.persetujuan');
+    });
+
+    // ====================================================
+    // 6. RUTE LAINNYA (Opsional/Legacy)
+    // ====================================================
     Route::get('/scan', [BorrowController::class, 'showBorrowForm'])->name('scan');
     Route::post('/scan-barcode', [BorrowController::class, 'scanBarcode'])->name('scanBarcode');
     Route::post('/borrow/add-to-cart', [BorrowController::class, 'addToCart'])->name('add.to.cart');

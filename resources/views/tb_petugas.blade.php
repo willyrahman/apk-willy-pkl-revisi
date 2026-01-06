@@ -32,9 +32,9 @@
                             <div class="card-body">
                                 <div class="table-responsive">
                                     @if(session('success'))
-                                        <div class="alert alert-success">
-                                            {{ session('success') }}
-                                        </div>
+                                    <div class="alert alert-success">
+                                        {{ session('success') }}
+                                    </div>
                                     @endif
                                     <table class="table">
                                         <thead class="text-primary">
@@ -53,8 +53,8 @@
                                                 <td class="text-center">{{ $key + 1 }}</td>
                                                 <td class="text-center">{{ $item->name }}</td>
                                                 <td class="text-center">{{ $item->email }}</td>
-                                                <td class="text-center">{{ $item->role }}</td>
-                                                <td class="text-center">{{ $item->password }}</td>
+                                                <td class="text-center"><span class="badge badge-info">{{ ucfirst($item->role) }}</span></td>
+                                                <td class="text-center">******</td>
                                                 <td class="text-center">
                                                     <button type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#editPetugasModal{{ $item->id }}" title="Edit">
                                                         <i class="fa fa-edit"></i>
@@ -68,49 +68,6 @@
                                                     </form>
                                                 </td>
                                             </tr>
-
-                                            <!-- Modal Edit Petugas -->
-                                            <div class="modal fade" id="editPetugasModal{{ $item->id }}" tabindex="-1" role="dialog" aria-labelledby="editPetugasModalLabel{{ $item->id }}" aria-hidden="true">
-                                                <div class="modal-dialog" role="document">
-                                                    <div class="modal-content">
-                                                        <div class="modal-header">
-                                                            <h5 class="modal-title">Edit Petugas</h5>
-                                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                                <span aria-hidden="true">&times;</span>
-                                                            </button>
-                                                        </div>
-                                                        <form action="{{ route('petugas.update', $item->id) }}" method="POST">
-                                                            @csrf
-                                                            @method('PUT')
-                                                            <div class="modal-body">
-                                                                <div class="form-group">
-                                                                    <label for="edit_name">Nama Petugas</label>
-                                                                    <input type="text" class="form-control" name="name" value="{{ $item->name }}" required>
-                                                                </div>
-                                                                <div class="form-group">
-                                                                    <label for="edit_email">Email</label>
-                                                                    <input type="email" class="form-control" name="email" value="{{ $item->email }}" required>
-                                                                </div>
-                                                                <div class="form-group">
-                                                                    <label for="edit_password">Password</label>
-                                                                    <input type="password" class="form-control" name="password">
-                                                                </div>
-                                                                <div class="form-group">
-                                                                    <label for="edit_role">Role</label>
-                                                                    <select class="form-control" name="role" required>
-                                                                        <option value="operator" {{ $item->role == 'operator' ? 'selected' : '' }}>Operator</option>
-                                                                        <option value="admin" {{ $item->role == 'admin' ? 'selected' : '' }}>Admin</option>
-                                                                    </select>
-                                                                </div>
-                                                            </div>
-                                                            <div class="modal-footer">
-                                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-                                                                <button type="submit" class="btn btn-warning">Simpan</button>
-                                                            </div>
-                                                        </form>
-                                                    </div>
-                                                </div>
-                                            </div>
                                             @endforeach
                                         </tbody>
                                     </table>
@@ -120,61 +77,118 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Modal Tambah Petugas -->
-            <div class="modal fade" id="addPetugasModal" tabindex="-1" role="dialog" aria-labelledby="addPetugasModalLabel" aria-hidden="true">
-                <div class="modal-dialog" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">Tambah Petugas</h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <form action="{{ route('petugas.store') }}" method="POST">
-                            @csrf
-                            <div class="modal-body">
-                                <div class="form-group">
-                                    <label for="name">Nama Petugas</label>
-                                    <input type="text" class="form-control" name="name" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="email">Email</label>
-                                    <input type="email" class="form-control" name="email" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="password">Password</label>
-                                    <input type="password" class="form-control" name="password" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="password_confirmation">Konfirmasi Password</label>
-                                    <input type="password" class="form-control" name="password_confirmation" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="role">Role</label>
-                                    <select class="form-control" name="role" required>
-                                        <option value="operator">Operator</option>
-                                        <option value="admin">Admin</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-                                <button type="submit" class="btn btn-primary">Tambah</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-
         </div>
     </div>
 
-    <!-- Scripts -->
+    <div class="modal fade" id="addPetugasModal" tabindex="-1" role="dialog" aria-labelledby="addPetugasModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addPetugasModalLabel">Tambah Petugas</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form action="{{ route('petugas.store') }}" method="POST">
+                    @csrf
+                    <div class="modal-body">
+                        @if ($errors->any())
+                        <div class="alert alert-danger">
+                            <ul>
+                                @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                        <script>
+                            window.onload = function() {
+                                $('#addPetugasModal').modal('show');
+                            };
+                        </script>
+                        @endif
+                        <div class="form-group">
+                            <label for="name">Nama Petugas</label>
+                            <input type="text" class="form-control" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" class="form-control" name="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Password</label>
+                            <input type="password" class="form-control" name="password" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Konfirmasi Password</label>
+                            <input type="password" class="form-control" name="password_confirmation" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="role">Role</label>
+                            <select class="form-control" name="role" required>
+                                <option value="operator">Operator</option>
+                                <option value="admin">Admin</option>
+                                <option value="kepala">Kepala</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">Tambah</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    @foreach($petugas as $item)
+    <div class="modal fade" id="editPetugasModal{{ $item->id }}" tabindex="-1" role="dialog" aria-labelledby="editPetugasModalLabel{{ $item->id }}">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editPetugasModalLabel{{ $item->id }}">Edit Petugas</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form action="{{ route('petugas.update', $item->id) }}" method="POST">
+                    @csrf
+                    @method('PUT')
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label>Nama Petugas</label>
+                            <input type="text" class="form-control" name="name" value="{{ $item->name }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" class="form-control" name="email" value="{{ $item->email }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Password (Isi jika ingin mengganti)</label>
+                            <input type="password" class="form-control" name="password">
+                        </div>
+                        <div class="form-group">
+                            <label>Role</label>
+                            <select class="form-control" name="role" required>
+                                <option value="operator" {{ $item->role == 'operator' ? 'selected' : '' }}>Operator</option>
+                                <option value="admin" {{ $item->role == 'admin' ? 'selected' : '' }}>Admin</option>
+                                <option value="kepala" {{ $item->role == 'kepala' ? 'selected' : '' }}>Kepala</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-warning">Simpan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    @endforeach
+
     <script src="../assets/js/core/jquery.min.js"></script>
     <script src="../assets/js/core/popper.min.js"></script>
     <script src="../assets/js/core/bootstrap.min.js"></script>
-    <script src="../assets/js/plugins/perfect-scrollbar.jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/perfect-scrollbar@1.5.5/dist/perfect-scrollbar.min.js"></script>
     <script src="../assets/js/paper-dashboard.min.js?v=2.0.1" type="text/javascript"></script>
 </body>
 

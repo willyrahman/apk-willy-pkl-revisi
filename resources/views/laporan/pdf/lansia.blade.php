@@ -5,13 +5,14 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>{{ $judul }}</title>
     <style>
-        @php // Memaksa sistem menggunakan bahasa Indonesia untuk tanggal
-        \Carbon\Carbon::setLocale('id');
+        /* Mengatur Bahasa Carbon ke Indonesia */
+        @php \Carbon\Carbon::setLocale('id');
 
         @endphp body {
             font-family: "Times New Roman", serif;
             margin: 0;
             padding: 0;
+            line-height: 1.3;
         }
 
         @page {
@@ -22,7 +23,8 @@
         .kop-table {
             width: 100%;
             border-bottom: 3px solid #000;
-            margin-bottom: 5px;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
         }
 
         .kop-table td {
@@ -37,64 +39,72 @@
 
         .kop-text {
             text-align: center;
-            padding-right: 70px;
         }
 
         .kop-text h2 {
             margin: 0;
-            font-size: 16px;
+            font-size: 18px;
             text-transform: uppercase;
         }
 
         .kop-text h3 {
             margin: 0;
-            font-size: 14px;
+            font-size: 16px;
             text-transform: uppercase;
         }
 
         .kop-text p {
             margin: 2px 0;
-            font-size: 10px;
+            font-size: 11px;
             font-style: italic;
         }
 
         .judul {
             text-align: center;
-            margin-bottom: 10px;
+            margin-top: 15px;
+            margin-bottom: 15px;
             text-transform: uppercase;
             font-weight: bold;
-            font-size: 12px;
+            font-size: 14px;
             text-decoration: underline;
         }
 
         .tabel-data {
             width: 100%;
             border-collapse: collapse;
+            table-layout: fixed;
+            /* Memaksa lebar kolom sesuai yang ditentukan */
         }
 
         .tabel-data th,
         .tabel-data td {
             border: 1px solid #000;
-            padding: 3px;
-            font-size: 8.5px;
-            /* Perkecil font agar semua kolom muat */
+            padding: 4px 2px;
+            font-size: 9px;
             vertical-align: middle;
             word-wrap: break-word;
+            /* Memastikan teks panjang pindah baris */
         }
 
         .tabel-data th {
-            background-color: #f0f0f0;
+            background-color: #e9ecef;
             text-align: center;
             font-weight: bold;
+            text-transform: uppercase;
         }
 
         .center {
             text-align: center;
         }
 
+        .text-left {
+            text-align: left;
+            padding-left: 5px;
+        }
+
         .ttd-container {
             width: 100%;
-            margin-top: 20px;
+            margin-top: 30px;
         }
 
         .ttd-table {
@@ -105,7 +115,7 @@
         .ttd-table td {
             border: none;
             text-align: center;
-            font-size: 11px;
+            font-size: 12px;
         }
     </style>
 </head>
@@ -115,13 +125,13 @@
     <table class="kop-table">
         <tr>
             <td class="kop-logo">
-                <img src="{{ public_path('images/logo.png') }}" width="60px" height="auto">
+                <img src="{{ asset('images/logo.png') }}" width="70px" height="auto">
             </td>
             <td class="kop-text">
                 <h2>PEMERINTAH KOTA BANJARMASIN</h2>
                 <h3>DINAS KESEHATAN PUSKESMAS PEKAPURAN LAUT</h3>
                 <p>Jl. Pekapuran B Laut, Kel. Pekapuran Laut, Kec. Banjarmasin Tengah</p>
-                <p>Kota Banjarmasin, Kalimantan Selatan. Telp: (0511) 123456</p>
+                <p>Kota Banjarmasin, Kalimantan Selatan. Kode Pos: 70233</p>
             </td>
         </tr>
     </table>
@@ -132,46 +142,47 @@
     <table class="tabel-data">
         <thead>
             <tr>
-                <th width="3%">No</th>
-                <th width="7%">Tgl Kunjungan</th>
-                <th width="8%">NIK</th> {{-- NIK DITAMBAHKAN --}}
-                <th width="10%">Nama Lansia</th>
-                <th width="3%">Umur</th>
-                <th width="12%">Alamat</th>
-                <th width="5%">Tensi</th>
-                <th width="4%">GDS</th>
-                <th width="4%">Chol</th>
-                <th width="6%">Status Gizi</th>
-                <th width="5%">Merokok</th>
-                <th width="5%">Depresi</th>
-                <th width="5%">Kurang Sayur</th>
-                <th width="5%">Kurang Aktif</th>
-                <th width="8%">No E-RM</th>
+                <th width="25px">No</th>
+                <th width="75px">Tgl Kunjungan</th>
+                <th width="95px">NIK</th>
+                <th width="110px">Nama Lansia</th>
+                <th width="30px">Umur</th>
+                <th width="120px">Alamat</th>
+                <th width="50px">Tensi</th>
+                <th width="35px">GDS</th>
+                <th width="35px">Chol</th>
+                <th width="70px">Status Gizi</th>
+                <th width="40px">Rokok</th>
+                <th width="45px">Depresi</th>
+                <th width="40px">Sayur</th>
+                <th width="40px">Aktif</th>
+                <th width="70px">No E-RM</th>
             </tr>
         </thead>
         <tbody>
-            @foreach($data as $index => $item)
+            @forelse($data as $index => $item)
             <tr>
                 <td class="center">{{ $index + 1 }}</td>
-                <td class="center">{{ \Carbon\Carbon::parse($item->tanggal_kunjungan)->translatedFormat('d F Y') }}</td>
-                <td class="center">{{ $item->nik }}</td> {{-- MENAMPILKAN NIK --}}
-                <td>{{ $item->nama_lengkap }}</td>
+                <td class="center">{{ \Carbon\Carbon::parse($item->tanggal_kunjungan)->translatedFormat('d-m-Y') }}</td>
+                <td class="center">{{ $item->nik }}</td>
+                <td class="text-left">{{ $item->nama_lengkap }}</td>
                 <td class="center">{{ $item->umur }}</td>
-                <td>{{ $item->alamat }}</td>
+                <td class="text-left">{{ $item->alamat }}</td>
                 <td class="center">{{ $item->sistole }}/{{ $item->diastole }}</td>
-                <td class="center">{{ $item->gds }}</td>
-                <td class="center">{{ $item->kolesterol }}</td>
+                <td class="center">{{ $item->gds ?? '-' }}</td>
+                <td class="center">{{ $item->kolesterol ?? '-' }}</td>
                 <td class="center">{{ $item->status_gizi }}</td>
-
-                {{-- Pastikan nama field di bawah ini sama dengan di database --}}
-                <td class="center">{{ $item->merokok ?? '-' }}</td>
-                <td class="center">{{ $item->depresi ?? '-' }}</td>
-                <td class="center">{{ $item->kurang_makan_sayur_buah ?? '-' }}</td>
-                <td class="center">{{ $item->kurang_aktifitas_fisik ?? '-' }}</td>
-
+                <td class="center">{{ $item->merokok ?? 'Tidak' }}</td>
+                <td class="center">{{ $item->depresi ?? 'Tidak' }}</td>
+                <td class="center">{{ $item->kurang_makan_sayur_buah ?? 'Tidak' }}</td>
+                <td class="center">{{ $item->kurang_aktifitas_fisik ?? 'Tidak' }}</td>
                 <td class="center">{{ $item->no_e_rekam_medis ?? '-' }}</td>
             </tr>
-            @endforeach
+            @empty
+            <tr>
+                <td colspan="15" class="center">Data tidak ditemukan dalam periode ini.</td>
+            </tr>
+            @endforelse
         </tbody>
     </table>
 
@@ -179,8 +190,8 @@
     <div class="ttd-container">
         <table class="ttd-table">
             <tr>
-                <td width="70%"></td>
-                <td width="30%">
+                <td width="65%"></td>
+                <td width="35%">
                     Banjarmasin, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }} <br>
                     Mengetahui, <br>
                     <strong>Kepala Puskesmas</strong>

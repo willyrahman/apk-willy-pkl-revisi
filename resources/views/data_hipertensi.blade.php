@@ -14,6 +14,7 @@
 
     <link href="../assets/css/bootstrap.min.css" rel="stylesheet" />
     <link href="../assets/css/paper-dashboard.css?v=2.0.1" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
@@ -23,16 +24,75 @@
             font-size: 14px;
         }
 
-        .modal-body label {
+        /* Style Baru untuk Modal Detail agar Rapi */
+        .detail-card {
+            background: #fff;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            border: 1px solid #eee;
+        }
+
+        .detail-icon {
+            width: 30px;
+            color: #51cbce;
+            text-align: center;
+            margin-right: 10px;
+            font-size: 18px;
+        }
+
+        .stat-box {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 12px;
+            text-align: center;
+            border: 1px solid #e9ecef;
+            height: 100%;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #9a9a9a;
+            margin-bottom: 5px;
+            display: block;
+            font-weight: bold;
+        }
+
+        .stat-value {
+            font-size: 16px;
             font-weight: bold;
             color: #333;
         }
 
-        .detail-text {
-            border-bottom: 1px solid #eee;
-            padding-bottom: 5px;
+        .section-title-custom {
+            border-bottom: 2px solid #51cbce;
             margin-bottom: 15px;
-            color: #555;
+            margin-top: 5px;
+            padding-bottom: 5px;
+            font-weight: bold;
+            color: #51cbce;
+            text-transform: uppercase;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+        }
+
+        .detail-label-custom {
+            font-weight: bold;
+            color: #66615b;
+            font-size: 12px;
+            margin-bottom: 0;
+        }
+
+        .detail-value-custom {
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #f4f4f4;
+            padding-bottom: 5px;
         }
 
         .modal {
@@ -66,43 +126,42 @@
 
                             <div class="card-body">
                                 <div class="table-responsive">
-                                    <table class="table table-striped">
+                                    <table class="table table-striped text-center">
                                         <thead class="text-primary">
                                             <tr>
-                                                <th class="text-center">No</th>
-                                                <th>No e-RM</th> {{-- KOLOM BARU --}}
+                                                <th>No</th>
+                                                <th>No e-RM</th>
                                                 <th>Tanggal</th>
                                                 <th>Nama Pasien</th>
                                                 <th>NIK</th>
                                                 <th>JK</th>
                                                 <th>Alamat</th>
                                                 <th>No. Asuransi</th>
-                                                <th class="text-center">Skala Nyeri</th>
+                                                <th>Skala Nyeri</th>
                                                 <th>Diagnosa</th>
                                                 <th>Kasus</th>
-                                                <th class="text-center">Aksi</th>
+                                                <th>Aksi</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             @foreach($data_hipertensi as $index => $item)
                                             <tr>
-                                                <td class="text-center">{{ $index + 1 }}</td>
-                                                <td><span class="badge badge-info">{{ $item->no_e_rekam_medis ?? '-' }}</span></td> {{-- DATA BARU --}}
+                                                <td>{{ $index + 1 }}</td>
+                                                <td><span class="badge badge-info">{{ $item->no_e_rekam_medis ?? '-' }}</span></td>
                                                 <td>{{ \Carbon\Carbon::parse($item->tanggal)->format('d-m-Y') }}</td>
-                                                <td>{{ $item->nama_pasien }}</td>
+                                                <td class="text-left">{{ $item->nama_pasien }}</td>
                                                 <td>{{ $item->nik }}</td>
                                                 <td>{{ $item->jenis_kelamin }}</td>
                                                 <td>{{ Str::limit($item->alamat, 15) }}</td>
                                                 <td>{{ $item->no_asuransi ?? '-' }}</td>
-                                                <td class="text-center">{{ $item->skala_nyeri }}</td>
+                                                <td>{{ $item->skala_nyeri }}</td>
                                                 <td>{{ $item->diagnosa_1 }} ({{ $item->icd_x_1 }})</td>
                                                 <td>
                                                     <span class="badge {{ $item->jenis_kasus_1 == 'Baru' ? 'badge-success' : 'badge-warning' }}">
                                                         {{ $item->jenis_kasus_1 }}
                                                     </span>
                                                 </td>
-                                                <td class="text-center">
-                                                    {{-- TOMBOL DETAIL --}}
+                                                <td>
                                                     <button type="button" class="btn btn-sm btn-info btn-icon btn-detail"
                                                         data-toggle="modal" data-target="#detailHipertensiModal"
                                                         data-nama="{{ $item->nama_pasien }}"
@@ -119,10 +178,9 @@
                                                         data-icd="{{ $item->icd_x_1 }}"
                                                         data-diagnosa="{{ $item->diagnosa_1 }}"
                                                         data-kasus="{{ $item->jenis_kasus_1 }}">
-                                                        <i class="fa fa-eye"></i>
+                                                        <i class="fa fa-info-circle"></i>
                                                     </button>
 
-                                                    {{-- TOMBOL EDIT --}}
                                                     <button type="button" class="btn btn-sm btn-warning btn-icon btn-edit"
                                                         data-toggle="modal" data-target="#editHipertensiModal"
                                                         data-id="{{ $item->id }}"
@@ -143,7 +201,6 @@
                                                         <i class="fa fa-edit"></i>
                                                     </button>
 
-                                                    {{-- TOMBOL HAPUS --}}
                                                     <form id="delete-form-{{ $item->id }}" action="{{ route('hipertensi.destroy', $item->id) }}" method="POST" style="display:inline-block;">
                                                         @csrf @method('DELETE')
                                                         <button type="button" class="btn btn-sm btn-danger btn-icon" onclick="confirmDelete({{ $item->id }})">
@@ -170,9 +227,7 @@
             <div class="modal-content">
                 <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title">Input Data Pasien Hipertensi</h5>
-                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button>
                 </div>
                 <form action="{{ route('hipertensi.store') }}" method="POST">
                     @csrf
@@ -254,9 +309,7 @@
             <div class="modal-content">
                 <div class="modal-header bg-warning">
                     <h5 class="modal-title">Edit Data Hipertensi</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
                 </div>
                 <form id="editForm" method="POST">
                     @csrf @method('PUT')
@@ -334,67 +387,93 @@
 
     <div class="modal fade" id="detailHipertensiModal" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
+            <div class="modal-content border-0">
                 <div class="modal-header bg-info text-white">
-                    <h5 class="modal-title">Detail Data Pasien</h5>
-                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <h5 class="modal-title"><i class="fas fa-heartbeat mr-2"></i> Detail Rekam Medis Hipertensi</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body bg-light">
                     <div class="row">
-                        <div class="col-md-6"><label>Nama Pasien</label>
-                            <p class="detail-text" id="det_nama"></p>
+                        <div class="col-md-7">
+                            <div class="detail-card h-100 mb-md-0">
+                                <h6 class="section-title-custom"><i class="fas fa-user-circle detail-icon"></i>Identitas Pasien</h6>
+                                <div class="row mb-1">
+                                    <div class="col-sm-5 detail-label-custom">Nama Lengkap</div>
+                                    <div class="col-sm-7 detail-value-custom" id="det_nama"></div>
+                                </div>
+                                <div class="row mb-1">
+                                    <div class="col-sm-5 detail-label-custom">NIK / No e-RM</div>
+                                    <div class="col-sm-7 detail-value-custom"><span id="det_nik"></span> / <span class="text-info" id="det_erm"></span></div>
+                                </div>
+                                <div class="row mb-1">
+                                    <div class="col-sm-5 detail-label-custom">Jenis Kelamin</div>
+                                    <div class="col-sm-7 detail-value-custom" id="det_jk"></div>
+                                </div>
+                                <div class="row mb-1">
+                                    <div class="col-sm-5 detail-label-custom">No. Telepon</div>
+                                    <div class="col-sm-7 detail-value-custom" id="det_telp"></div>
+                                </div>
+                                <div class="row mb-1">
+                                    <div class="col-sm-5 detail-label-custom">No. Asuransi</div>
+                                    <div class="col-sm-7 detail-value-custom" id="det_asuransi"></div>
+                                </div>
+                                <div class="row mb-0">
+                                    <div class="col-sm-5 detail-label-custom">Alamat Lengkap</div>
+                                    <div class="col-sm-7 detail-value-custom" id="det_alamat"></div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="col-md-6"><label>NIK</label>
-                            <p class="detail-text" id="det_nik"></p>
+
+                        <div class="col-md-5">
+                            <div class="detail-card h-100 mb-0">
+                                <h6 class="section-title-custom"><i class="fas fa-notes-medical detail-icon"></i>Status Kunjungan</h6>
+                                <div class="row">
+                                    <div class="col-12 mb-3">
+                                        <div class="stat-box">
+                                            <span class="stat-label">Skala Nyeri</span>
+                                            <span class="stat-value text-danger" style="font-size: 24px;" id="det_nyeri"></span>
+                                            <small class="text-muted d-block">(0 - 10)</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 mb-3">
+                                        <div class="stat-box">
+                                            <span class="stat-label">Jenis Kasus</span>
+                                            <div id="det_kasus_badge"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="stat-box bg-white">
+                                            <span class="stat-label">Tanggal Periksa</span>
+                                            <span class="stat-value" id="det_tgl"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-md-6"><label>No e-Rekam Medis</label> {{-- DETAIL BARU --}}
-                            <p class="detail-text" id="det_erm"></p>
-                        </div>
-                        <div class="col-md-6"><label>Jenis Kelamin</label>
-                            <p class="detail-text" id="det_jk"></p>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-4"><label>Tanggal Periksa</label>
-                            <p class="detail-text" id="det_tgl"></p>
-                        </div>
-                        <div class="col-md-4"><label>No. Asuransi</label>
-                            <p class="detail-text" id="det_asuransi"></p>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-4"><label>No. Telepon</label>
-                            <p class="detail-text" id="det_telp"></p>
-                        </div>
-                        <div class="col-md-8"><label>Alamat Lengkap</label>
-                            <p class="detail-text" id="det_alamat"></p>
-                        </div>
-                    </div>
-                    <hr>
-                    <h6 class="text-primary">Data Medis</h6>
-                    <div class="row">
-                        <div class="col-md-4"><label>Skala Nyeri</label>
-                            <p class="detail-text" id="det_nyeri"></p>
-                        </div>
-                        <div class="col-md-4"><label>Jenis Kasus</label>
-                            <p class="detail-text" id="det_kasus"></p>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-4"><label>Kode ICD-X</label>
-                            <p class="detail-text font-weight-bold" id="det_icd"></p>
-                        </div>
-                        <div class="col-md-8"><label>Diagnosa</label>
-                            <p class="detail-text" id="det_diagnosa"></p>
+
+                    <div class="row mt-4">
+                        <div class="col-md-12">
+                            <div class="detail-card mb-0">
+                                <h6 class="section-title-custom"><i class="fas fa-stethoscope detail-icon"></i>Hasil Diagnosa Utama</h6>
+                                <div class="p-3 border rounded bg-white text-center text-md-left">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-3 border-md-right text-center mb-3 mb-md-0">
+                                            <label class="detail-label-custom d-block mb-2">Kode ICD-X</label>
+                                            <span class="badge badge-pill badge-primary" style="font-size: 16px; padding: 10px 20px;" id="det_icd"></span>
+                                        </div>
+                                        <div class="col-md-9 pl-md-4">
+                                            <label class="detail-label-custom">Keterangan Diagnosa</label>
+                                            <p class="font-weight-bold text-dark mb-0" style="font-size: 16px;" id="det_diagnosa"></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary btn-round" data-dismiss="modal">Tutup</button>
                 </div>
             </div>
         </div>
@@ -418,7 +497,7 @@
                 $('#edit_tanggal').val($(this).data('tgl'));
                 $('#edit_nama').val($(this).data('nama'));
                 $('#edit_nik').val($(this).data('nik'));
-                $('#edit_erm').val($(this).data('erm')); // Isi Edit ERM
+                $('#edit_erm').val($(this).data('erm'));
                 $('#edit_jk').val($(this).data('jk'));
                 $('#edit_asuransi').val($(this).data('asuransi'));
                 $('#edit_telp').val($(this).data('telp'));
@@ -431,20 +510,25 @@
                 $('#edit_diagnosa').val($(this).data('diagnosa'));
             });
 
-            // 2. Handle Detail Modal
+            // 2. Handle Detail Modal (Versi Rapi)
             $(document).on('click', '.btn-detail', function() {
                 $('#det_nama').text($(this).data('nama'));
                 $('#det_nik').text($(this).data('nik'));
-                $('#det_erm').text($(this).data('erm') || '-'); // Isi Detail ERM
+                $('#det_erm').text($(this).data('erm') || '-');
                 $('#det_jk').text($(this).data('jk'));
                 $('#det_tgl').text($(this).data('tgl'));
-                $('#det_asuransi').text($(this).data('asuransi'));
-                $('#det_telp').text($(this).data('telp'));
+                $('#det_asuransi').text($(this).data('asuransi') || '-');
+                $('#det_telp').text($(this).data('telp') || '-');
                 $('#det_alamat').text($(this).data('alamat') + ' (RT ' + $(this).data('rt') + ' / RW ' + $(this).data('rw') + ')');
+
                 $('#det_nyeri').text($(this).data('nyeri'));
-                $('#det_kasus').text($(this).data('kasus'));
                 $('#det_icd').text($(this).data('icd'));
                 $('#det_diagnosa').text($(this).data('diagnosa'));
+
+                // Logika Badge Kasus
+                var kasus = $(this).data('kasus');
+                var badgeKasus = kasus === 'Baru' ? 'badge-success' : 'badge-warning';
+                $('#det_kasus_badge').html('<span class="badge ' + badgeKasus + '" style="font-size:14px; padding:8px 15px; border-radius:20px;">Kasus ' + kasus + '</span>');
             });
         });
 
@@ -456,7 +540,6 @@
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
                 confirmButtonText: 'Ya, hapus!',
                 cancelButtonText: 'Batal'
             }).then((result) => {

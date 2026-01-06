@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 
 class PetugasController extends Controller
 {
@@ -17,25 +19,26 @@ class PetugasController extends Controller
     // Menyimpan data petugas baru
     public function store(Request $request)
     {
-        // Validasi input
+        // 1. Validasi
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
+            // Pastikan input di HTML bernama 'password_confirmation'
             'password' => 'required|string|min:8|confirmed',
-            'role' => 'required|in:operator,admin',
+            'role' => 'required|in:operator,admin,kepala',
         ]);
 
-        // Simpan data petugas baru tanpa hashing password
+        // 2. Simpan ke Database
         User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => $request->password, // Tidak aman, hanya untuk pengembangan
+            'password' => Hash::make($request->password), // Wajib Hash
             'role' => $request->role,
         ]);
 
+        // 3. Kembali ke halaman dengan pesan sukses
         return redirect()->route('petugas.index')->with('success', 'Petugas berhasil ditambahkan');
     }
-
     // Mengupdate data petugas
     public function update(Request $request, $id)
     {
@@ -43,7 +46,7 @@ class PetugasController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $id,
-            'role' => 'required|in:operator,admin',
+            'role' => 'required|in:operator,admin,kepala',
         ]);
 
         $petugas = User::findOrFail($id);

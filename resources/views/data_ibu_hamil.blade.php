@@ -61,7 +61,7 @@
                                     <table class="table table-striped">
                                         <thead class="text-primary">
                                             <th class="text-center">No</th>
-                                            <th>No e-RM</th> {{-- KOLOM BARU --}}
+                                            <th>No e-RM</th>
                                             <th>Nama Ibu</th>
                                             <th>Nama Suami</th>
                                             <th class="text-center">Tgl Lahir</th>
@@ -75,15 +75,16 @@
                                             @foreach ($ibuhampils as $index => $ibuhamil)
                                             <tr>
                                                 <td class="text-center">{{ $index + 1 }}</td>
-                                                <td><span class="badge badge-info">{{ $ibuhamil->no_e_rekam_medis ?? '-' }}</span></td> {{-- DATA BARU --}}
+                                                <td><span class="badge badge-info">{{ $ibuhamil->no_e_rekam_medis ?? '-' }}</span></td>
                                                 <td>{{ $ibuhamil->nama_ibu }}</td>
                                                 <td>{{ $ibuhamil->nama_suami }}</td>
-                                                <td class="text-center">{{ \Carbon\Carbon::parse($ibuhamil->tanggal_lahir)->format('d-m-Y') }}</td>
+                                                {{-- FORMAT TANGGAL INDONESIA --}}
+                                                <td class="text-center">{{ \Carbon\Carbon::parse($ibuhamil->tanggal_lahir)->translatedFormat('d F Y') }}</td>
                                                 <td class="text-center">{{ $ibuhamil->nik }}</td>
                                                 <td>{{ Str::limit($ibuhamil->alamat, 20) }}</td>
                                                 <td class="text-center">
                                                     @if($ibuhamil->tgl_pemeriksaan_k6)
-                                                    {{ \Carbon\Carbon::parse($ibuhamil->tgl_pemeriksaan_k6)->format('d-m-Y') }}
+                                                    {{ \Carbon\Carbon::parse($ibuhamil->tgl_pemeriksaan_k6)->translatedFormat('d F Y') }}
                                                     @else
                                                     <span class="badge badge-warning">Belum</span>
                                                     @endif
@@ -95,12 +96,12 @@
                                                         data-toggle="modal"
                                                         data-target="#detailIbuHamilModal"
                                                         data-nama="{{ $ibuhamil->nama_ibu }}"
-                                                        data-lahir="{{ \Carbon\Carbon::parse($ibuhamil->tanggal_lahir)->format('d-m-Y') }}"
+                                                        data-lahir="{{ \Carbon\Carbon::parse($ibuhamil->tanggal_lahir)->translatedFormat('d F Y') }}"
                                                         data-nik="{{ $ibuhamil->nik }}"
                                                         data-erm="{{ $ibuhamil->no_e_rekam_medis }}"
                                                         data-suami="{{ $ibuhamil->nama_suami }}"
                                                         data-alamat="{{ $ibuhamil->alamat }}"
-                                                        data-k6="{{ $ibuhamil->tgl_pemeriksaan_k6 ? \Carbon\Carbon::parse($ibuhamil->tgl_pemeriksaan_k6)->format('d-m-Y') : 'Belum diperiksa' }}"
+                                                        data-k6="{{ $ibuhamil->tgl_pemeriksaan_k6 ? \Carbon\Carbon::parse($ibuhamil->tgl_pemeriksaan_k6)->translatedFormat('d F Y') : 'Belum diperiksa' }}"
                                                         data-jaminan="{{ $ibuhamil->jaminan_kesehatan }}"
                                                         title="Detail">
                                                         <i class="fas fa-info-circle"></i>
@@ -150,9 +151,7 @@
             <div class="modal-content">
                 <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title">Tambah Data Ibu Hamil</h5>
-                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button>
                 </div>
                 <form action="{{ route('ibuHamil.store') }}" method="POST" onsubmit="showLoading()">
                     @csrf
@@ -195,9 +194,7 @@
             <div class="modal-content">
                 <div class="modal-header bg-warning">
                     <h5 class="modal-title">Edit Data Ibu Hamil</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
                 </div>
                 <form id="editForm" method="POST" onsubmit="showLoading()">
                     @csrf @method('PUT')
@@ -239,9 +236,7 @@
             <div class="modal-content">
                 <div class="modal-header bg-info text-white">
                     <h5 class="modal-title"><strong>Detail Data Ibu Hamil</strong></h5>
-                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button>
                 </div>
                 <div class="modal-body">
                     <table class="table table-borderless">
@@ -250,7 +245,7 @@
                             <td>: <span id="det_nama"></span></td>
                         </tr>
                         <tr>
-                            <td><strong>No e-RM</strong></td> {{-- DETAIL BARU --}}
+                            <td><strong>No e-RM</strong></td>
                             <td>: <span id="det_erm"></span></td>
                         </tr>
                         <tr>
@@ -293,37 +288,31 @@
     <script src="../assets/js/paper-dashboard.min.js?v=2.0.1" type="text/javascript"></script>
 
     <script>
-        // 1. Script Detail Modal
         $(document).on('click', '.btn-detail', function() {
             $('#det_nama').text($(this).data('nama'));
             $('#det_lahir').text($(this).data('lahir'));
             $('#det_nik').text($(this).data('nik'));
-            $('#det_erm').text($(this).data('erm') || '-'); // Isi Detail ERM
+            $('#det_erm').text($(this).data('erm') || '-');
             $('#det_suami').text($(this).data('suami'));
             $('#det_alamat').text($(this).data('alamat'));
             $('#det_k6').text($(this).data('k6'));
             $('#det_jaminan').text($(this).data('jaminan'));
         });
 
-        // 2. Script Edit Modal
         $(document).on('click', '.btn-edit', function() {
             var id = $(this).data('id');
-            var url = "{{ route('ibuHamil.update', ':id') }}";
-            url = url.replace(':id', id);
-
+            var url = "{{ route('ibuHamil.update', ':id') }}".replace(':id', id);
             $('#editForm').attr('action', url);
-
             $('#edit_nama').val($(this).data('nama'));
             $('#edit_lahir').val($(this).data('lahir'));
             $('#edit_nik').val($(this).data('nik'));
-            $('#edit_erm').val($(this).data('erm')); // Isi Edit ERM
+            $('#edit_erm').val($(this).data('erm'));
             $('#edit_suami').val($(this).data('suami'));
             $('#edit_alamat').val($(this).data('alamat'));
             $('#edit_k6').val($(this).data('k6'));
             $('#edit_jaminan').val($(this).data('jaminan'));
         });
 
-        // 3. Konfirmasi Hapus
         function confirmDelete(id) {
             Swal.fire({
                 title: 'Hapus Data?',
@@ -340,7 +329,6 @@
             });
         }
 
-        // 4. Loading Alert
         function showLoading() {
             Swal.fire({
                 title: 'Memproses...',
@@ -352,16 +340,13 @@
             });
         }
 
-        @if(session('success'))
-        Swal.fire({
+        @if(session('success')) Swal.fire({
             icon: 'success',
             title: 'Berhasil',
             text: "{{ session('success') }}"
         });
         @endif
-
-        @if(session('error'))
-        Swal.fire({
+        @if(session('error')) Swal.fire({
             icon: 'error',
             title: 'Gagal',
             text: "{{ session('error') }}"

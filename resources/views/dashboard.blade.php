@@ -12,13 +12,14 @@
     <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700,200" rel="stylesheet" />
     <link href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" rel="stylesheet">
 
+    {{-- Pastikan path asset ini benar sesuai folder public Anda --}}
     <link href="{{ asset('assets/css/bootstrap.min.css') }}" rel="stylesheet" />
     <link href="{{ asset('assets/css/paper-dashboard.css?v=2.0.1') }}" rel="stylesheet" />
     <link href="{{ asset('assets/demo/demo.css') }}" rel="stylesheet" />
 </head>
 
 <body class="">
-    <div class="wrapper ">
+    <div class="wrapper">
         <div class="sidebar" data-color="white" data-active-color="danger">
             @include('sidebar')
         </div>
@@ -27,120 +28,88 @@
             @include('navbar')
 
             <div class="content">
-                {{-- ROW 1: KARTU STATISTIK --}}
+                {{-- KARTU STATISTIK --}}
                 <div class="row">
-                    {{-- KARTU 1: DATA IBU HAMIL --}}
-                    <div class="col-lg-3 col-md-6 col-sm-6">
-                        <div class="card card-stats">
-                            <div class="card-body ">
-                                <div class="row">
-                                    <div class="col-5 col-md-4">
-                                        <div class="icon-big text-center icon-warning">
-                                            <i class="nc-icon nc-single-02 text-warning"></i>
-                                        </div>
-                                    </div>
-                                    <div class="col-7 col-md-8">
-                                        <div class="numbers">
-                                            <p class="card-category">Ibu Hamil</p>
-                                            <p class="card-title">{{ $totalibuhamil ?? 0 }}
-                                            <p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card-footer ">
-                                <hr>
-                                <div class="stats"><i class="fa fa-refresh"></i> Data Terupdate</div>
-                            </div>
-                        </div>
-                    </div>
+                    @php
+                    $cards = [
+                    [
+                    'title' => 'Ibu Hamil',
+                    'count' => $totalibuhamil ?? 0,
+                    'icon' => 'nc-single-02',
+                    'color' => 'text-warning',
+                    'footer' => 'Data Terupdate',
+                    'desc' => 'Data pemantauan kesehatan ibu selama masa kehamilan hingga persalinan.'
+                    ],
+                    [
+                    'title' => 'Data ODGJ',
+                    'count' => $totalodgj ?? 0,
+                    'icon' => 'nc-bulb-63',
+                    'color' => 'text-success',
+                    'footer' => 'Pasien Aktif',
+                    'desc' => 'Pendataan dan pemantauan rutin untuk pasien dengan gangguan jiwa.'
+                    ],
+                    [
+                    'title' => 'Hipertensi',
+                    'count' => $totalhipertensi ?? 0,
+                    'icon' => 'nc-favourite-28',
+                    'color' => 'text-danger',
+                    'footer' => 'Terpantau',
+                    'desc' => 'Catatan tekanan darah dan faktor risiko pasien penyakit tidak menular.'
+                    ],
+                    [
+                    'title' => 'Data Lansia',
+                    'count' => $totallansia ?? 0,
+                    'icon' => 'nc-satisfied',
+                    'color' => 'text-primary',
+                    'footer' => 'Pemeriksaan Rutin',
+                    'desc' => 'Data pelayanan kesehatan rutin untuk masyarakat lanjut usia.'
+                    ],
+                    [
+                    'title' => 'Data Balita',
+                    'count' => $totalbalita ?? 0,
+                    'icon' => 'nc-controller-modern',
+                    'color' => 'text-info',
+                    'footer' => 'Tumbuh Kembang',
+                    'desc' => 'Pemantauan pertumbuhan, imunisasi, dan status gizi anak balita.'
+                    ]
+                    ];
+                    @endphp
 
-                    {{-- KARTU 2: DATA ODGJ --}}
-                    <div class="col-lg-3 col-md-6 col-sm-6">
+                    @foreach($cards as $card)
+                    <div class="col-lg-4 col-md-6 col-sm-6 mb-4"> {{-- Diubah ke col-lg-4 agar teks penjelasan lebih rapi --}}
                         <div class="card card-stats">
-                            <div class="card-body ">
+                            <div class="card-body">
                                 <div class="row">
                                     <div class="col-5 col-md-4">
-                                        <div class="icon-big text-center icon-warning">
-                                            <i class="nc-icon nc-bulb-63 text-success"></i>
-                                        </div>
+                                        <div class="icon-big text-center"><i class="nc-icon {{ $card['icon'] }} {{ $card['color'] }}"></i></div>
                                     </div>
                                     <div class="col-7 col-md-8">
                                         <div class="numbers">
-                                            <p class="card-category">Data ODGJ</p>
-                                            <p class="card-title">{{ $totalodgj ?? 0 }}
-                                            <p>
+                                            <p class="card-category">{{ $card['title'] }}</p>
+                                            <p class="card-title">{{ $card['count'] }}</p>
                                         </div>
                                     </div>
                                 </div>
+                                <hr>
+                                {{-- Penjelasan Data 1 Baris --}}
+                                <p class="card-category text-dark small" style="text-transform: none;">{{ $card['desc'] }}</p>
                             </div>
                             <div class="card-footer ">
                                 <hr>
-                                <div class="stats"><i class="fa fa-check-square"></i> Pasien Aktif</div>
+                                <div class="stats">{{ $card['footer'] }}</div>
                             </div>
                         </div>
                     </div>
-
-                    {{-- KARTU 3: DATA HIPERTENSI --}}
-                    <div class="col-lg-3 col-md-6 col-sm-6">
-                        <div class="card card-stats">
-                            <div class="card-body ">
-                                <div class="row">
-                                    <div class="col-5 col-md-4">
-                                        <div class="icon-big text-center icon-warning">
-                                            <i class="nc-icon nc-favourite-28 text-danger"></i>
-                                        </div>
-                                    </div>
-                                    <div class="col-7 col-md-8">
-                                        <div class="numbers">
-                                            <p class="card-category">Hipertensi</p>
-                                            <p class="card-title">{{ $totalhipertensi ?? 0 }}
-                                            <p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card-footer ">
-                                <hr>
-                                <div class="stats"><i class="fa fa-heartbeat"></i> Terpantau</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {{-- KARTU 4: DATA LANSIA (BARU) --}}
-                    <div class="col-lg-3 col-md-6 col-sm-6">
-                        <div class="card card-stats">
-                            <div class="card-body ">
-                                <div class="row">
-                                    <div class="col-5 col-md-4">
-                                        <div class="icon-big text-center icon-warning">
-                                            <i class="nc-icon nc-satisfied text-primary"></i>
-                                        </div>
-                                    </div>
-                                    <div class="col-7 col-md-8">
-                                        <div class="numbers">
-                                            <p class="card-category">Data Lansia</p>
-                                            <p class="card-title">{{ $totallansia ?? 0 }}
-                                            <p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card-footer ">
-                                <hr>
-                                <div class="stats"><i class="fa fa-user"></i> Pemeriksaan Rutin</div>
-                            </div>
-                        </div>
-                    </div>
+                    @endforeach
                 </div>
 
-                {{-- ROW 2: GRAFIK & INFORMASI --}}
+                {{-- GRAFIK --}}
                 <div class="row">
                     <div class="col-md-4">
                         <div class="card">
                             <div class="card-header">
                                 <h5 class="card-title">Statistik Pasien</h5>
-                                <p class="card-category">Proporsi Data Kesehatan</p>
+                                <p class="card-category">Visualisasi perbandingan jumlah data pasien yang terdaftar di sistem.</p>
                             </div>
                             <div class="card-body">
                                 <canvas id="chartPreferences" width="400" height="400"></canvas>
@@ -151,33 +120,19 @@
                                     <i class="fa fa-circle text-success"></i> ODGJ
                                     <i class="fa fa-circle text-danger"></i> Hipertensi
                                     <i class="fa fa-circle text-primary"></i> Lansia
+                                    <i class="fa fa-circle" style="color: #6bd098;"></i> Balita
                                 </div>
                             </div>
                         </div>
                     </div>
-
                     <div class="col-md-8">
-                        <div class="card card-chart">
+                        <div class="card">
                             <div class="card-header">
-                                <h5 class="card-title">Selamat Datang, Admin!</h5>
-                                <p class="card-category">Sistem Informasi Kesehatan Terpadu</p>
+                                <h5 class="card-title">Selamat Datang, {{ Auth::user()->name }}!</h5>
+                                <p class="card-category">Akses utama manajemen informasi kesehatan terpadu Puskesmas Pekapuran Laut.</p>
                             </div>
                             <div class="card-body">
-                                <p class="text-justify">
-                                    Ini adalah dashboard utama untuk memantau data kesehatan masyarakat di wilayah kerja Puskesmas.
-                                    Anda dapat mengelola data berikut melalui menu di samping:
-                                </p>
-                                <ul>
-                                    <li><strong>Ibu Hamil:</strong> Pemantauan kehamilan dan risiko tinggi.</li>
-                                    <li><strong>ODGJ:</strong> Pendataan pasien dengan gangguan jiwa dan jadwal kontrol.</li>
-                                    <li><strong>Hipertensi:</strong> Monitoring tekanan darah dan faktor risiko.</li>
-                                    <li><strong>Lansia:</strong> Data kesehatan lansia dan posyandu.</li>
-                                </ul>
-                                <hr>
-                                <div class="alert alert-info alert-with-icon" data-notify="container">
-                                    <span data-notify="icon" class="nc-icon nc-bell-55"></span>
-                                    <span data-notify="message">Jangan lupa melakukan backup data secara berkala.</span>
-                                </div>
+                                <p>Sistem ini digunakan untuk mencatat dan mengolah data pelayanan kesehatan secara terpadu di Puskesmas Pekapuran Laut.</p>
                             </div>
                         </div>
                     </div>
@@ -187,55 +142,36 @@
         </div>
     </div>
 
+    {{-- Script JS --}}
     <script src="{{ asset('assets/js/core/jquery.min.js') }}"></script>
     <script src="{{ asset('assets/js/core/popper.min.js') }}"></script>
     <script src="{{ asset('assets/js/core/bootstrap.min.js') }}"></script>
     <script src="{{ asset('assets/js/plugins/perfect-scrollbar.jquery.min.js') }}"></script>
+    {{-- Chart JS Wajib Dimuat Sebelum Script Custom --}}
     <script src="{{ asset('assets/js/plugins/chartjs.min.js') }}"></script>
     <script src="{{ asset('assets/js/paper-dashboard.min.js?v=2.0.1') }}" type="text/javascript"></script>
 
     <script>
         $(document).ready(function() {
-            var ctx = document.getElementById("chartPreferences").getContext("2d");
+            // Ambil elemen canvas
+            var ctx = document.getElementById("chartPreferences");
+            if (!ctx) return;
 
-            // Ambil data dari PHP Variable
-            var dataIbu = {
-                {
-                    $totalibuhamil ?? 0
-                }
-            };
-            var dataOdgj = {
-                {
-                    $totalodgj ?? 0
-                }
-            };
-            var dataHipertensi = {
-                {
-                    $totalhipertensi ?? 0
-                }
-            };
-            var dataLansia = {
-                {
-                    $totallansia ?? 0
-                }
-            };
+            // Menggunakan Number() dan quotes agar tidak dirusak auto-formatter
+            var dataIbu = Number("{{ $totalibuhamil ?? 0 }}");
+            var dataOdgj = Number("{{ $totalodgj ?? 0 }}");
+            var dataHipertensi = Number("{{ $totalhipertensi ?? 0 }}");
+            var dataLansia = Number("{{ $totallansia ?? 0 }}");
+            var dataBalita = Number("{{ $totalbalita ?? 0 }}");
 
-            var myChart = new Chart(ctx, {
+            var myChart = new Chart(ctx.getContext("2d"), {
                 type: 'pie',
                 data: {
-                    labels: ["" + dataIbu + "%", "" + dataOdgj + "%", "" + dataHipertensi + "%", "" + dataLansia + "%"],
+                    labels: ["Ibu Hamil", "ODGJ", "Hipertensi", "Lansia", "Balita"],
                     datasets: [{
-                        label: "Emails",
-                        pointRadius: 0,
-                        pointHoverRadius: 0,
-                        backgroundColor: [
-                            '#ffcc00', // Kuning (Ibu Hamil)
-                            '#4acccd', // Hijau Tosca (ODGJ)
-                            '#ef8157', // Merah (Hipertensi)
-                            '#51cbce' // Biru (Lansia)
-                        ],
+                        backgroundColor: ['#ffcc00', '#4acccd', '#ef8157', '#51cbce', '#6bd098'],
                         borderWidth: 0,
-                        data: [dataIbu, dataOdgj, dataHipertensi, dataLansia]
+                        data: [dataIbu, dataOdgj, dataHipertensi, dataLansia, dataBalita]
                     }]
                 },
                 options: {
@@ -244,30 +180,7 @@
                     },
                     tooltips: {
                         enabled: true
-                    },
-                    scales: {
-                        yAxes: [{
-                            ticks: {
-                                display: false
-                            },
-                            gridLines: {
-                                drawBorder: false,
-                                zeroLineColor: "transparent",
-                                color: 'rgba(255,255,255,0.05)'
-                            }
-                        }],
-                        xAxes: [{
-                            barPercentage: 1.6,
-                            gridLines: {
-                                drawBorder: false,
-                                color: 'rgba(255,255,255,0.1)',
-                                zeroLineColor: "transparent"
-                            },
-                            ticks: {
-                                display: false,
-                            }
-                        }]
-                    },
+                    }
                 }
             });
         });
