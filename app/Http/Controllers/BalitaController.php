@@ -11,9 +11,9 @@ class BalitaController extends Controller
     public function index()
     {
         // Ambil data balita beserta data ibunya (eager loading)
-        $balitas = Balita::with('ibuHamil')->orderBy('created_at', 'desc')->get();
+        $balitas = Balita::with('ibuHamil')->orderBy('tgl_pemeriksaan', 'desc')->get();
 
-        // Ambil semua data ibu hamil untuk dropdown form tambah
+        // Ambil semua data ibu hamil untuk dropdown
         $data_ibu = IbuHamil::orderBy('nama_ibu', 'asc')->get();
 
         return view('data_balita', compact('balitas', 'data_ibu'));
@@ -22,31 +22,37 @@ class BalitaController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'ibu_hamil_id' => 'required|exists:ibu_hamils,id',
-            'nama_pasien' => 'required',
-            'nik' => 'required|numeric',
-            'jenis_kelamin' => 'required',
-            'umur' => 'required',
-            'alamat' => 'required',
-            'tgl_pemeriksaan' => 'required|date',
-            'berat_badan' => 'required|numeric',
-            'tinggi_badan' => 'required|numeric',
-            'suhu' => 'required|numeric',
+            'ibu_hamil_id'        => 'required|exists:ibu_hamils,id',
+            'no_e_rekam_medis'    => 'nullable|string',
+            'nama_pasien'         => 'required|string',
+            'nik'                 => 'required|numeric',
+            'jenis_kelamin'       => 'required|in:L,P',
+            'umur'                => 'required',
+            'tgl_pemeriksaan'     => 'required|date',
+            'alamat'              => 'required',
+            'poli_ruangan'        => 'required',
+            'dokter_tenaga_medis' => 'required',
+            'berat_badan'         => 'required|numeric',
+            'tinggi_badan'        => 'required|numeric',
+            'suhu'                => 'nullable|numeric',
+            'keluhan_utama'       => 'nullable|string',
+            'diagnosa_1'          => 'nullable|string',
+            'icd_x_1'             => 'nullable|string',
+            'obat'                => 'nullable|string',
+            'apoteker'            => 'nullable|string',
         ]);
 
         try {
-            // Ambil semua data input
             $data = $request->all();
 
-            // HITUNG IMT DI BACKEND
-            // Kita hitung otomatis agar data 'hasil_imt_status_gizi' terisi valid
+            // Hitung IMT & Status Gizi (Sinkron dengan JS)
             $data['hasil_imt_status_gizi'] = $this->hitungIMT($request->berat_badan, $request->tinggi_badan);
 
             Balita::create($data);
 
-            return redirect()->route('balita.index')->with('success', 'Data Balita berhasil ditambahkan!');
+            return redirect()->route('balita.index')->with('success', 'Data Balita berhasil disimpan!');
         } catch (\Exception $e) {
-            return redirect()->route('balita.index')->with('error', 'Gagal menyimpan: ' . $e->getMessage());
+            return redirect()->back()->withInput()->with('error', 'Gagal menyimpan data: ' . $e->getMessage());
         }
     }
 
@@ -54,28 +60,39 @@ class BalitaController extends Controller
     {
         $balita = Balita::findOrFail($id);
 
+        // Validasi disesuaikan dengan semua inputan di modal Edit
         $request->validate([
-            'ibu_hamil_id' => 'required|exists:ibu_hamils,id',
-            'nama_pasien' => 'required',
-            'nik' => 'required|numeric',
-            // Validasi berat dan tinggi jika diubah
-            'berat_badan' => 'numeric',
-            'tinggi_badan' => 'numeric',
+            'ibu_hamil_id'        => 'required|exists:ibu_hamils,id',
+            'no_e_rekam_medis'    => 'nullable|string',
+            'nama_pasien'         => 'required|string',
+            'nik'                 => 'required|numeric',
+            'jenis_kelamin'       => 'required|in:L,P',
+            'umur'                => 'required',
+            'tgl_pemeriksaan'     => 'required|date',
+            'alamat'              => 'required',
+            'poli_ruangan'        => 'required',
+            'dokter_tenaga_medis' => 'required',
+            'berat_badan'         => 'required|numeric',
+            'tinggi_badan'        => 'required|numeric',
+            'suhu'                => 'nullable|numeric',
+            'keluhan_utama'       => 'nullable|string',
+            'diagnosa_1'          => 'nullable|string',
+            'icd_x_1'             => 'nullable|string',
+            'obat'                => 'nullable|string',
+            'apoteker'            => 'nullable|string',
         ]);
 
         try {
             $data = $request->all();
 
-            // Hitung ulang IMT jika Berat atau Tinggi diubah
-            if ($request->has('berat_badan') && $request->has('tinggi_badan')) {
-                $data['hasil_imt_status_gizi'] = $this->hitungIMT($request->berat_badan, $request->tinggi_badan);
-            }
+            // Hitung ulang IMT jika ada perubahan berat atau tinggi
+            $data['hasil_imt_status_gizi'] = $this->hitungIMT($request->berat_badan, $request->tinggi_badan);
 
             $balita->update($data);
 
             return redirect()->route('balita.index')->with('success', 'Data Balita berhasil diperbarui!');
         } catch (\Exception $e) {
-            return redirect()->route('balita.index')->with('error', 'Gagal update: ' . $e->getMessage());
+            return redirect()->back()->withInput()->with('error', 'Gagal memperbarui data: ' . $e->getMessage());
         }
     }
 
@@ -85,26 +102,31 @@ class BalitaController extends Controller
             Balita::findOrFail($id)->delete();
             return redirect()->route('balita.index')->with('success', 'Data Balita berhasil dihapus!');
         } catch (\Exception $e) {
-            return redirect()->route('balita.index')->with('error', 'Gagal hapus: ' . $e->getMessage());
+            return redirect()->route('balita.index')->with('error', 'Gagal menghapus data.');
         }
     }
 
     /**
-     * Fungsi Helper untuk Menghitung IMT
-     * Rumus: Berat (kg) / (Tinggi (m) * Tinggi (m))
+     * Helper untuk menghitung IMT dan Status Gizi
+     * Output: "22.50 (Gizi Baik)"
      */
     private function hitungIMT($berat, $tinggi)
     {
         if ($berat > 0 && $tinggi > 0) {
-            // Konversi tinggi dari cm ke meter
             $tinggiMeter = $tinggi / 100;
-
-            // Hitung rumus
             $imt = $berat / ($tinggiMeter * $tinggiMeter);
 
-            // Kembalikan hasil dengan 2 angka di belakang koma
-            return number_format($imt, 2, '.', '');
+            $status = '';
+            if ($imt < 18.5) {
+                $status = 'Gizi Kurang';
+            } elseif ($imt >= 18.5 && $imt <= 25) {
+                $status = 'Gizi Baik';
+            } else {
+                $status = 'Gizi Lebih';
+            }
+
+            return number_format($imt, 2) . ' (' . $status . ')';
         }
-        return 0;
+        return '-';
     }
 }

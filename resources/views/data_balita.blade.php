@@ -110,6 +110,30 @@
         <div class="main-panel">
             @include('navbar')
             <div class="content">
+
+                @if ($errors->any())
+                <div class="alert alert-danger alert-dismissible fade show">
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <strong>Input Gagal!</strong> Periksa field berikut:
+                    <ul>
+                        @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+                @endif
+
+                @if(session('error'))
+                <div class="alert alert-danger alert-dismissible fade show">
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    {{ session('error') }}
+                </div>
+                @endif
+
                 <div class="row">
                     <div class="col-md-12">
                         <div class="card">
@@ -306,7 +330,9 @@
                         </div>
                         <div class="form-group"><label>Alamat</label><textarea name="alamat" class="form-control" rows="2"></textarea></div>
                         <div class="form-group"><label>Poli</label><input type="text" name="poli_ruangan" class="form-control" required></div>
-                        <div class="form-group"><label>Dokter</label><input type="text" name="dokter-tenaga_medis" class="form-control" required></div>
+
+                        <div class="form-group"><label>Dokter</label><input type="text" name="dokter_tenaga_medis" class="form-control" required></div>
+
                         <div class="row bg-light p-2 mx-1 mb-3 border rounded">
                             <div class="col-md-3">
                                 <div class="form-group"><label>Berat (Kg)</label><input type="number" step="0.1" name="berat_badan" id="add_berat" class="form-control" oninput="calcIMT('add')" required></div>
@@ -589,7 +615,6 @@
             $('#det_obat').text($(this).data('obat') || '-');
             $('#det_apoteker').text($(this).data('apoteker') || '-');
 
-            // Logika Badge Status Gizi
             var imtStatus = $(this).data('imt');
             var badgeClass = 'badge-secondary';
             if (imtStatus.includes('Baik')) badgeClass = 'badge-success';
@@ -661,14 +686,6 @@
                 }
             });
         }
-
-        @if(session('success'))
-        Swal.fire({
-            icon: 'success',
-            title: 'Berhasil',
-            text: "{{ session('success') }}"
-        });
-        @endif
     </script>
 </body>
 
