@@ -52,6 +52,7 @@
                                         <th>No e-RM</th> {{-- KOLOM BARU --}}
                                         <th>NIK</th>
                                         <th>Nama Pasien</th>
+                                        <th>Tanggal Kontrol</th>
                                         <th>JK</th>
                                         <th>Tgl Lahir</th>
                                         <th>Alamat</th>
@@ -66,6 +67,7 @@
                                         <td>{{ $item->no_e_rekam_medis ?? '-' }}</td> {{-- DATA BARU --}}
                                         <td>{{ $item->nik }}</td>
                                         <td>{{ $item->nama }}</td>
+                                        <td>{{ \Carbon\Carbon::parse($item->tanggal_kontrol)->translatedFormat('d F Y') }}</td>
                                         <td>{{ $item->jenis_kelamin }}</td>
 
                                         {{-- FORMAT TANGGAL INDONESIA --}}

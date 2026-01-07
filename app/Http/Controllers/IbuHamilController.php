@@ -101,4 +101,31 @@ class IbuHamilController extends Controller
             return redirect()->route('ibuHamil.index')->with('error', 'Gagal menghapus data: ' . $e->getMessage());
         }
     }
+
+    public function laporan(Request $request)
+    {
+        // 1. Mulai Query
+        $query = IbuHamil::query();
+
+        // 2. Logika Filter
+        if ($request->filled('tgl_awal') && $request->filled('tgl_akhir')) {
+            // Filter berdasarkan Tanggal Pemeriksaan K6
+            $query->whereBetween('tgl_pemeriksaan_k6', [
+                $request->tgl_awal,
+                $request->tgl_akhir
+            ]);
+        }
+
+        // 3. Ambil data (urutkan dari yang terbaru)
+        $data = $query->orderBy('tgl_pemeriksaan_k6', 'desc')->get();
+
+        // 4. Return View
+        // PENTING: Sesuaikan nama view dengan lokasi file Anda.
+        // Jika file ada di folder resources/views/laporan/ibuHamil.blade.php
+        return view('laporan.ibu_hamil', [
+            'data' => $data,
+            'tgl_awal' => $request->tgl_awal,
+            'tgl_akhir' => $request->tgl_akhir
+        ]);
+    }
 }

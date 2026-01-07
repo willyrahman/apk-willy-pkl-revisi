@@ -41,7 +41,7 @@
                                     <tr>
                                         <th>No</th>
                                         <th>No e-RM</th> {{-- KOLOM BARU --}}
-                                        <th>Tanggal</th>
+                                        <th>Tanggal Periksa</th>
                                         <th>Nama Pasien</th>
                                         <th>NIK</th>
                                         <th>JK</th>

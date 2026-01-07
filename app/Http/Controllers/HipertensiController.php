@@ -82,4 +82,30 @@ class HipertensiController extends Controller
             return redirect()->back()->with('error', 'Gagal menghapus data: ' . $e->getMessage());
         }
     }
+
+    public function laporan(Request $request)
+    {
+        // 1. Mulai Query
+        $query = Hipertensi::query();
+
+        // 2. Logika Filter
+        // Kita gunakan kolom 'tanggal' sesuai dengan yang ada di view Anda
+        if ($request->filled('tgl_awal') && $request->filled('tgl_akhir')) {
+            $query->whereBetween('tanggal', [
+                $request->tgl_awal,
+                $request->tgl_akhir
+            ]);
+        }
+
+        // 3. Ambil data (urutkan dari tanggal terbaru)
+        $data = $query->orderBy('tanggal', 'desc')->get();
+
+        // 4. Return View
+        // Pastikan nama file sesuai lokasi: resources/views/laporan/hipertensi.blade.php
+        return view('laporan.hipertensi', [
+            'data' => $data,
+            'tgl_awal' => $request->tgl_awal,
+            'tgl_akhir' => $request->tgl_akhir
+        ]);
+    }
 }

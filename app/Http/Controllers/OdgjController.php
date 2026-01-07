@@ -119,4 +119,26 @@ class OdgjController extends Controller
 
         return $pdf->stream('laporan_odgj.pdf');
     }
+
+    /**
+     * Menampilkan halaman Laporan dengan Filter Tanggal Kontrol.
+     * Pastikan route 'laporan.odgj' mengarah ke method ini.
+     */
+    public function laporan(Request $request)
+    {
+        $query = Odgj::query();
+
+        if ($request->filled('tgl_awal') && $request->filled('tgl_akhir')) {
+            $query->whereBetween('tanggal_kontrol', [$request->tgl_awal, $request->tgl_akhir]);
+        }
+
+        $data = $query->orderBy('tanggal_kontrol', 'desc')->get();
+
+        // PERBAIKAN: Tambahkan 'laporan.' karena file ada di dalam folder laporan
+        return view('laporan.odgj', [
+            'data' => $data,
+            'tgl_awal' => $request->tgl_awal,
+            'tgl_akhir' => $request->tgl_akhir
+        ]);
+    }
 }

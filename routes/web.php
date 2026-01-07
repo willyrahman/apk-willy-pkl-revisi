@@ -54,16 +54,32 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('balita', BalitaController::class);
     Route::resource('lansia', LansiaController::class);
 
-    // --- MENU LAPORAN ---
+    /// --- MENU LAPORAN ---
     Route::prefix('laporan')->name('laporan.')->group(function () {
         Route::get('/ibu-hamil', [LaporanController::class, 'ibuHamil'])->name('ibuHamil');
-        Route::get('/odgj', [LaporanController::class, 'odgj'])->name('odgj');
+
+        // PERBAIKAN DISINI: Ubah Controller dan Method-nya
+        // Arahkan ke OdgjController, method 'laporan' (yang sudah ada logika filternya)
+        Route::get('/odgj', [OdgjController::class, 'laporan'])->name('odgj');
+        // PERBAIKAN: Arahkan ke IbuHamilController method 'laporan'
+        Route::get('/ibu_hamil', [IbuHamilController::class, 'laporan'])->name('ibuHamil');
+        // PERBAIKAN DISINI: Arahkan ke HipertensiController method 'laporan'
+        Route::get('/hipertensi', [HipertensiController::class, 'laporan'])->name('hipertensi');
+        // PERBAIKAN DISINI: Arahkan ke BalitaController method 'laporan'
+        Route::get('/balita', [BalitaController::class, 'laporan'])->name('balita');
+        // PERBAIKAN DISINI: Arahkan ke LansiaController method 'laporan'
+        Route::get('/lansia', [LansiaController::class, 'laporan'])->name('lansia');
+
         Route::get('/hipertensi', [LaporanController::class, 'hipertensi'])->name('hipertensi');
         Route::get('/balita', [LaporanController::class, 'balita'])->name('balita');
         Route::get('/lansia', [LaporanController::class, 'lansia'])->name('lansia');
 
+        // HAPUS atau KOMENTARI baris di bawah ini karena sudah digantikan oleh baris di atas
+        // Route::get('/laporan-odgj', [OdgjController::class, 'laporan'])->name('laporan.odgj');
+
         Route::get('/export/pdf/{jenis}', [LaporanController::class, 'exportPdf'])->name('export.pdf');
         Route::get('/export/excel/{jenis}', [LaporanController::class, 'exportExcel'])->name('export.excel');
+        
     });
 
     // ====================================================

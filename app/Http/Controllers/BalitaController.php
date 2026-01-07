@@ -129,4 +129,30 @@ class BalitaController extends Controller
         }
         return '-';
     }
+
+    public function laporan(Request $request)
+    {
+        // 1. Mulai Query (dengan Eager Loading relasi ibuHamil)
+        $query = Balita::with('ibuHamil');
+
+        // 2. Logika Filter
+        // Menggunakan kolom 'tgl_pemeriksaan' sesuai view Anda
+        if ($request->filled('tgl_awal') && $request->filled('tgl_akhir')) {
+            $query->whereBetween('tgl_pemeriksaan', [
+                $request->tgl_awal,
+                $request->tgl_akhir
+            ]);
+        }
+
+        // 3. Ambil data (urutkan dari tanggal terbaru)
+        $data = $query->orderBy('tgl_pemeriksaan', 'desc')->get();
+
+        // 4. Return View
+        // Pastikan file view disimpan di: resources/views/laporan/balita.blade.php
+        return view('laporan.balita', [
+            'data' => $data,
+            'tgl_awal' => $request->tgl_awal,
+            'tgl_akhir' => $request->tgl_akhir
+        ]);
+    }
 }
