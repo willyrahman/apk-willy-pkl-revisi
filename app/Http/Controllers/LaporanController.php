@@ -164,9 +164,14 @@ class LaporanController extends Controller
             case 'ibuHamil':
                 $query = IbuHamil::query();
                 if ($tgl_awal && $tgl_akhir) {
-                    $query->whereBetween('created_at', [$tgl_awal, $tgl_akhir]);
+                    // PERBAIKAN: Ubah 'created_at' menjadi 'tgl_pemeriksaan_k6'
+                    // Agar sesuai dengan tanggal pemeriksaan, bukan tanggal admin menginput data
+                    $query->whereBetween('tgl_pemeriksaan_k6', [$tgl_awal, $tgl_akhir]);
                 }
-                $data = $query->orderBy('created_at', 'desc')->get();
+
+                // PERBAIKAN: Urutkan berdasarkan tanggal periksa juga
+                $data = $query->orderBy('tgl_pemeriksaan_k6', 'desc')->get();
+
                 $judul = "Laporan Data Ibu Hamil";
                 $view = 'laporan.pdf.ibu_hamil';
                 break;
