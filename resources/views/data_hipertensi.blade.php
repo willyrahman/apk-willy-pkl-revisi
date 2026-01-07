@@ -102,6 +102,25 @@
         .modal-backdrop {
             z-index: 1040 !important;
         }
+
+        /* Style Search Box */
+        .search-box {
+            position: relative;
+            max-width: 250px;
+            margin-right: 15px;
+        }
+
+        .search-box input {
+            padding-right: 35px;
+            border-radius: 20px;
+        }
+
+        .search-box i {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            color: #999;
+        }
     </style>
 </head>
 
@@ -119,14 +138,25 @@
                         <div class="card">
                             <div class="card-header d-flex justify-content-between align-items-center">
                                 <h4 class="card-title">Data Pasien Hipertensi</h4>
-                                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addHipertensiModal">
-                                    <i class="nc-icon nc-simple-add"></i>&nbsp; Tambah Data
-                                </button>
+
+                                {{-- AREA TOMBOL DAN SEARCH --}}
+                                <div class="d-flex align-items-center">
+                                    {{-- Input Search --}}
+                                    <div class="search-box">
+                                        <input type="text" id="searchInput" class="form-control" placeholder="Cari data pasien...">
+                                        <i class="nc-icon nc-zoom-split"></i>
+                                    </div>
+
+                                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addHipertensiModal">
+                                        <i class="nc-icon nc-simple-add"></i>&nbsp; Tambah Data
+                                    </button>
+                                </div>
                             </div>
 
                             <div class="card-body">
                                 <div class="table-responsive">
-                                    <table class="table table-striped text-center">
+                                    {{-- Tambahkan ID pada tabel untuk selector jQuery --}}
+                                    <table class="table table-striped text-center" id="dataTable">
                                         <thead class="text-primary">
                                             <tr>
                                                 <th>No</th>
@@ -489,6 +519,15 @@
 
     <script>
         $(document).ready(function() {
+
+            // --- SCRIPT SEARCH / PENCARIAN ---
+            $("#searchInput").on("keyup", function() {
+                var value = $(this).val().toLowerCase();
+                $("#dataTable tbody tr").filter(function() {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                });
+            });
+
             // 1. Handle Edit Modal
             $(document).on('click', '.btn-edit', function() {
                 let id = $(this).data('id');

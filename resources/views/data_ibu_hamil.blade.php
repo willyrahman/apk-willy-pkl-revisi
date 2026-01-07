@@ -36,6 +36,25 @@
         .modal-backdrop {
             z-index: 1040 !important;
         }
+
+        /* Style untuk Search Bar */
+        .search-box {
+            position: relative;
+            max-width: 250px;
+            margin-right: 15px;
+        }
+
+        .search-box input {
+            padding-right: 35px;
+            border-radius: 20px;
+        }
+
+        .search-box i {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            color: #999;
+        }
     </style>
 </head>
 
@@ -52,13 +71,23 @@
                         <div class="card">
                             <div class="card-header d-flex justify-content-between align-items-center">
                                 <h4 class="card-title">Data Ibu Hamil</h4>
-                                <button type="button" class="btn btn-primary mr-4" data-toggle="modal" data-target="#addIbuHamilModal">
-                                    <i class="nc-icon nc-simple-add"></i>&nbsp; Tambah Data
-                                </button>
+
+                                {{-- AREA TOMBOL DAN SEARCH --}}
+                                <div class="d-flex align-items-center">
+                                    {{-- Input Search --}}
+                                    <div class="search-box">
+                                        <input type="text" id="searchInput" class="form-control" placeholder="Cari data...">
+                                        <i class="nc-icon nc-zoom-split"></i>
+                                    </div>
+
+                                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addIbuHamilModal">
+                                        <i class="nc-icon nc-simple-add"></i>&nbsp; Tambah Data
+                                    </button>
+                                </div>
                             </div>
                             <div class="card-body">
                                 <div class="table-responsive">
-                                    <table class="table table-striped">
+                                    <table class="table table-striped" id="dataTable">
                                         <thead class="text-primary">
                                             <th class="text-center">No</th>
                                             <th>No e-RM</th>
@@ -68,7 +97,6 @@
                                             <th class="text-center">NIK</th>
                                             <th>Nama Suami</th>
                                             <th>Alamat</th>
-
                                             <th class="text-center">Jaminan</th>
                                             <th class="text-center">Aksi</th>
                                         </thead>
@@ -85,15 +113,12 @@
                                                     @endif
                                                 </td>
                                                 <td>{{ $ibuhamil->nama_ibu }}</td>
-                                                {{-- FORMAT TANGGAL INDONESIA --}}
                                                 <td class="text-center">{{ \Carbon\Carbon::parse($ibuhamil->tanggal_lahir)->translatedFormat('d F Y') }}</td>
                                                 <td class="text-center">{{ $ibuhamil->nik }}</td>
                                                 <td>{{ $ibuhamil->nama_suami }}</td>
                                                 <td>{{ Str::limit($ibuhamil->alamat, 20) }}</td>
-
                                                 <td class="text-center">{{ $ibuhamil->jaminan_kesehatan }}</td>
                                                 <td class="text-center">
-                                                    {{-- TOMBOL DETAIL --}}
                                                     <button class="btn btn-info btn-sm btn-detail"
                                                         data-toggle="modal"
                                                         data-target="#detailIbuHamilModal"
@@ -109,7 +134,6 @@
                                                         <i class="fas fa-info-circle"></i>
                                                     </button>
 
-                                                    {{-- TOMBOL EDIT --}}
                                                     <button class="btn btn-warning btn-sm btn-edit"
                                                         data-toggle="modal"
                                                         data-target="#editIbuHamilModal"
@@ -126,7 +150,6 @@
                                                         <i class="fas fa-pencil-alt"></i>
                                                     </button>
 
-                                                    {{-- TOMBOL HAPUS --}}
                                                     <form id="delete-form-{{ $ibuhamil->id }}" action="{{ route('ibuHamil.destroy', $ibuhamil->id) }}" method="POST" style="display:inline;">
                                                         @csrf @method('DELETE')
                                                         <button type="button" class="btn btn-danger btn-sm" onclick="confirmDelete({{ $ibuhamil->id }})" title="Delete">
@@ -158,21 +181,14 @@
                 <form action="{{ route('ibuHamil.store') }}" method="POST" onsubmit="showLoading()">
                     @csrf
                     <div class="modal-body">
-                        <div class="form-group">
-                            <label>No e-Rekam Medis</label>
-                            <input type="text" class="form-control" name="no_e_rekam_medis" placeholder="Opsional">
-                        </div>
+                        <div class="form-group"><label>No e-Rekam Medis</label><input type="text" class="form-control" name="no_e_rekam_medis" placeholder="Opsional"></div>
                         <div class="form-group"><label>Nama Ibu Hamil</label><input type="text" class="form-control" name="nama_ibu" required></div>
                         <div class="form-group"><label>Tanggal Lahir</label><input type="date" class="form-control" name="tanggal_lahir" required></div>
                         <div class="form-group"><label>NIK</label><input type="number" class="form-control" name="nik" required></div>
                         <div class="form-group"><label>Nama Suami</label><input type="text" class="form-control" name="nama_suami" required></div>
                         <div class="form-group"><label>Alamat</label><textarea class="form-control" name="alamat" rows="3" required></textarea></div>
-                        <div class="form-group">
-                            <label>Tanggal Pemeriksaan K6 <small class="text-muted">(Opsional)</small></label>
-                            <input type="date" class="form-control" name="tgl_pemeriksaan_k6">
-                        </div>
-                        <div class="form-group">
-                            <label>Jaminan Kesehatan</label>
+                        <div class="form-group"><label>Tanggal Pemeriksaan K6 <small class="text-muted">(Opsional)</small></label><input type="date" class="form-control" name="tgl_pemeriksaan_k6"></div>
+                        <div class="form-group"><label>Jaminan Kesehatan</label>
                             <select class="form-control" name="jaminan_kesehatan" required>
                                 <option value="">Pilih Jaminan</option>
                                 <option value="BPJS Mandiri">BPJS Mandiri</option>
@@ -201,21 +217,14 @@
                 <form id="editForm" method="POST" onsubmit="showLoading()">
                     @csrf @method('PUT')
                     <div class="modal-body">
-                        <div class="form-group">
-                            <label>No e-Rekam Medis</label>
-                            <input type="text" class="form-control" id="edit_erm" name="no_e_rekam_medis">
-                        </div>
+                        <div class="form-group"><label>No e-Rekam Medis</label><input type="text" class="form-control" id="edit_erm" name="no_e_rekam_medis"></div>
                         <div class="form-group"><label>Nama Ibu Hamil</label><input type="text" class="form-control" id="edit_nama" name="nama_ibu" required></div>
                         <div class="form-group"><label>Tanggal Lahir</label><input type="date" class="form-control" id="edit_lahir" name="tanggal_lahir" required></div>
                         <div class="form-group"><label>NIK</label><input type="number" class="form-control" id="edit_nik" name="nik" required></div>
                         <div class="form-group"><label>Nama Suami</label><input type="text" class="form-control" id="edit_suami" name="nama_suami" required></div>
                         <div class="form-group"><label>Alamat</label><textarea class="form-control" id="edit_alamat" name="alamat" rows="3" required></textarea></div>
-                        <div class="form-group">
-                            <label>Tanggal Pemeriksaan K6</label>
-                            <input type="date" class="form-control" id="edit_k6" name="tgl_pemeriksaan_k6">
-                        </div>
-                        <div class="form-group">
-                            <label>Jaminan Kesehatan</label>
+                        <div class="form-group"><label>Tanggal Pemeriksaan K6</label><input type="date" class="form-control" id="edit_k6" name="tgl_pemeriksaan_k6"></div>
+                        <div class="form-group"><label>Jaminan Kesehatan</label>
                             <select class="form-control" id="edit_jaminan" name="jaminan_kesehatan" required>
                                 <option value="BPJS Mandiri">BPJS Mandiri</option>
                                 <option value="BPJS PBI">BPJS PBI</option>
@@ -290,6 +299,17 @@
     <script src="../assets/js/paper-dashboard.min.js?v=2.0.1" type="text/javascript"></script>
 
     <script>
+        $(document).ready(function() {
+            // --- SCRIPT SEARCH / PENCARIAN ---
+            $("#searchInput").on("keyup", function() {
+                var value = $(this).val().toLowerCase();
+                $("#dataTable tbody tr").filter(function() {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                });
+            });
+        });
+
+        // Script untuk tombol Detail
         $(document).on('click', '.btn-detail', function() {
             $('#det_nama').text($(this).data('nama'));
             $('#det_lahir').text($(this).data('lahir'));
@@ -301,6 +321,7 @@
             $('#det_jaminan').text($(this).data('jaminan'));
         });
 
+        // Script untuk tombol Edit
         $(document).on('click', '.btn-edit', function() {
             var id = $(this).data('id');
             var url = "{{ route('ibuHamil.update', ':id') }}".replace(':id', id);

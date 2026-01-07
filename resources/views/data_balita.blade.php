@@ -20,6 +20,25 @@
             vertical-align: middle;
         }
 
+        /* Style Search Box */
+        .search-box {
+            position: relative;
+            max-width: 250px;
+            margin-right: 15px;
+        }
+
+        .search-box input {
+            padding-right: 35px;
+            border-radius: 20px;
+        }
+
+        .search-box i {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            color: #999;
+        }
+
         /* Style Baru untuk Detail Modal */
         .detail-card {
             background: #fff;
@@ -35,6 +54,7 @@
             color: #51cbce;
             text-align: center;
             margin-right: 10px;
+            font-size: 18px;
         }
 
         .stat-box {
@@ -113,9 +133,7 @@
 
                 @if ($errors->any())
                 <div class="alert alert-danger alert-dismissible fade show">
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                     <strong>Input Gagal!</strong> Periksa field berikut:
                     <ul>
                         @foreach ($errors->all() as $error)
@@ -127,9 +145,7 @@
 
                 @if(session('error'))
                 <div class="alert alert-danger alert-dismissible fade show">
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                     {{ session('error') }}
                 </div>
                 @endif
@@ -139,13 +155,23 @@
                         <div class="card">
                             <div class="card-header d-flex justify-content-between align-items-center">
                                 <h4 class="card-title">Data Pemeriksaan Balita</h4>
-                                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addBalitaModal">
-                                    <i class="nc-icon nc-simple-add"></i> Tambah Data
-                                </button>
+
+                                {{-- AREA SEARCH & TOMBOL --}}
+                                <div class="d-flex align-items-center">
+                                    {{-- Input Search --}}
+                                    <div class="search-box">
+                                        <input type="text" id="searchInput" class="form-control" placeholder="Cari data balita...">
+                                        <i class="nc-icon nc-zoom-split"></i>
+                                    </div>
+
+                                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addBalitaModal">
+                                        <i class="nc-icon nc-simple-add"></i> Tambah Data
+                                    </button>
+                                </div>
                             </div>
                             <div class="card-body">
                                 <div class="table-responsive">
-                                    <table class="table table-striped">
+                                    <table class="table table-striped" id="dataTable">
                                         <thead class="text-primary">
                                             <th>No</th>
                                             <th>No e-RM (Balita)</th>
@@ -182,10 +208,7 @@
                                                 <td>
                                                     <span class="font-weight-bold">{{ $item->ibuHamil->nama_ibu ?? '-' }}</span>
                                                     @if(isset($item->ibuHamil->no_e_rekam_medis))
-                                                    <br>
-                                                    <small class="text-muted" style="font-size: 11px;">
-                                                        RM: {{ $item->ibuHamil->no_e_rekam_medis }}
-                                                    </small>
+                                                    <br><small class="text-muted" style="font-size: 11px;">RM: {{ $item->ibuHamil->no_e_rekam_medis }}</small>
                                                     @endif
                                                 </td>
                                                 <td>{{ $item->umur }}</td>
@@ -210,6 +233,7 @@
                                                 <td>{{ $item->apoteker }}</td>
                                                 <td class="text-center">
                                                     <button class="btn btn-info btn-sm btn-detail"
+                                                        data-toggle="modal" data-target="#detailBalitaModal"
                                                         data-nama="{{ $item->nama_pasien }}"
                                                         data-nik="{{ $item->nik }}"
                                                         data-erm="{{ $item->no_e_rekam_medis }}"
@@ -228,12 +252,12 @@
                                                         data-diagnosa="{{ $item->diagnosa_1 }}"
                                                         data-icd="{{ $item->icd_x_1 }}"
                                                         data-obat="{{ $item->obat }}"
-                                                        data-apoteker="{{ $item->apoteker }}"
-                                                        data-toggle="modal" data-target="#detailBalitaModal">
+                                                        data-apoteker="{{ $item->apoteker }}">
                                                         <i class="fa fa-info-circle"></i>
                                                     </button>
 
                                                     <button class="btn btn-warning btn-sm btn-edit"
+                                                        data-toggle="modal" data-target="#editBalitaModal"
                                                         data-id="{{ $item->id }}"
                                                         data-ibu_id="{{ $item->ibu_hamil_id }}"
                                                         data-erm="{{ $item->no_e_rekam_medis }}"
@@ -253,8 +277,7 @@
                                                         data-diagnosa="{{ $item->diagnosa_1 }}"
                                                         data-icd="{{ $item->icd_x_1 }}"
                                                         data-obat="{{ $item->obat }}"
-                                                        data-apoteker="{{ $item->apoteker }}"
-                                                        data-toggle="modal" data-target="#editBalitaModal">
+                                                        data-apoteker="{{ $item->apoteker }}">
                                                         <i class="fa fa-edit"></i>
                                                     </button>
 
@@ -289,21 +312,10 @@
                 <form action="{{ route('balita.store') }}" method="POST">
                     @csrf
                     <div class="modal-body">
-                        <div class="form-group">
-                            <label>Pilih Nama Ibu</label>
-                            <select name="ibu_hamil_id" class="form-control" required>
-                                <option value="">-- Cari Nama Ibu --</option>
-                                @foreach($data_ibu as $ibu)
-                                <option value="{{ $ibu->id }}">
-                                    {{ $ibu->nama_ibu }} {{ $ibu->no_e_rekam_medis ? '(RM: '.$ibu->no_e_rekam_medis.')' : '' }}
-                                </option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>No e-Rekam Medis (Balita)</label>
-                            <input type="text" name="no_e_rekam_medis" class="form-control" placeholder="Nomor RM Elektronik">
-                        </div>
+                        <div class="form-group"><label>Pilih Nama Ibu</label><select name="ibu_hamil_id" class="form-control" required>
+                                <option value="">-- Cari Nama Ibu --</option>@foreach($data_ibu as $ibu)<option value="{{ $ibu->id }}">{{ $ibu->nama_ibu }} {{ $ibu->no_e_rekam_medis ? '(RM: '.$ibu->no_e_rekam_medis.')' : '' }}</option>@endforeach
+                            </select></div>
+                        <div class="form-group"><label>No e-Rekam Medis (Balita)</label><input type="text" name="no_e_rekam_medis" class="form-control" placeholder="Nomor RM Elektronik"></div>
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group"><label>Nama Balita</label><input type="text" name="nama_pasien" class="form-control" required></div>
@@ -314,12 +326,10 @@
                         </div>
                         <div class="row">
                             <div class="col-md-4">
-                                <div class="form-group"><label>JK</label>
-                                    <select name="jenis_kelamin" class="form-control">
+                                <div class="form-group"><label>JK</label><select name="jenis_kelamin" class="form-control">
                                         <option value="L">Laki-laki</option>
                                         <option value="P">Perempuan</option>
-                                    </select>
-                                </div>
+                                    </select></div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group"><label>Umur</label><input type="text" name="umur" class="form-control" required></div>
@@ -330,9 +340,7 @@
                         </div>
                         <div class="form-group"><label>Alamat</label><textarea name="alamat" class="form-control" rows="2"></textarea></div>
                         <div class="form-group"><label>Poli</label><input type="text" name="poli_ruangan" class="form-control" required></div>
-
                         <div class="form-group"><label>Dokter</label><input type="text" name="dokter_tenaga_medis" class="form-control" required></div>
-
                         <div class="row bg-light p-2 mx-1 mb-3 border rounded">
                             <div class="col-md-3">
                                 <div class="form-group"><label>Berat (Kg)</label><input type="number" step="0.1" name="berat_badan" id="add_berat" class="form-control" oninput="calcIMT('add')" required></div>
@@ -388,20 +396,8 @@
                 <form id="formEdit" method="POST">
                     @csrf @method('PUT')
                     <div class="modal-body">
-                        <div class="form-group">
-                            <label>Pilih Ibu</label>
-                            <select name="ibu_hamil_id" id="edit_ibu" class="form-control" required>
-                                @foreach($data_ibu as $ibu)
-                                <option value="{{ $ibu->id }}">
-                                    {{ $ibu->nama_ibu }} {{ $ibu->no_e_rekam_medis ? '(RM: '.$ibu->no_e_rekam_medis.')' : '' }}
-                                </option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>No e-Rekam Medis (Balita)</label>
-                            <input type="text" name="no_e_rekam_medis" id="edit_erm" class="form-control">
-                        </div>
+                        <div class="form-group"><label>Pilih Ibu</label><select name="ibu_hamil_id" id="edit_ibu" class="form-control" required>@foreach($data_ibu as $ibu)<option value="{{ $ibu->id }}">{{ $ibu->nama_ibu }} {{ $ibu->no_e_rekam_medis ? '(RM: '.$ibu->no_e_rekam_medis.')' : '' }}</option>@endforeach</select></div>
+                        <div class="form-group"><label>No e-Rekam Medis (Balita)</label><input type="text" name="no_e_rekam_medis" id="edit_erm" class="form-control"></div>
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group"><label>Nama Balita</label><input type="text" name="nama_pasien" id="edit_nama" class="form-control" required></div>
@@ -412,12 +408,10 @@
                         </div>
                         <div class="row">
                             <div class="col-md-4">
-                                <div class="form-group"><label>JK</label>
-                                    <select name="jenis_kelamin" id="edit_jk" class="form-control">
+                                <div class="form-group"><label>JK</label><select name="jenis_kelamin" id="edit_jk" class="form-control">
                                         <option value="L">Laki-laki</option>
                                         <option value="P">Perempuan</option>
-                                    </select>
-                                </div>
+                                    </select></div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group"><label>Umur</label><input type="text" name="umur" id="edit_umur" class="form-control"></div>
@@ -518,32 +512,21 @@
                                 </div>
                             </div>
                         </div>
-
                         <div class="col-md-5">
                             <div class="detail-card text-center">
                                 <h6 class="section-title mt-0 text-center"><i class="fas fa-weight detail-icon"></i>Antropometri</h6>
                                 <div class="row">
                                     <div class="col-6 mb-3">
-                                        <div class="stat-box">
-                                            <span class="stat-label">Berat</span>
-                                            <span class="stat-value" id="det_berat"></span>
-                                        </div>
+                                        <div class="stat-box"><span class="stat-label">Berat</span><span class="stat-value" id="det_berat"></span></div>
                                     </div>
                                     <div class="col-6 mb-3">
-                                        <div class="stat-box">
-                                            <span class="stat-label">Tinggi</span>
-                                            <span class="stat-value" id="det_tinggi"></span>
-                                        </div>
+                                        <div class="stat-box"><span class="stat-label">Tinggi</span><span class="stat-value" id="det_tinggi"></span></div>
                                     </div>
                                     <div class="col-12 mb-3">
-                                        <div class="stat-box">
-                                            <span class="stat-label">Suhu Tubuh</span>
-                                            <span class="stat-value text-danger" id="det_suhu"></span>
-                                        </div>
+                                        <div class="stat-box"><span class="stat-label">Suhu Tubuh</span><span class="stat-value text-danger" id="det_suhu"></span></div>
                                     </div>
                                     <div class="col-12">
-                                        <div class="p-2 border rounded bg-white">
-                                            <span class="stat-label text-center">IMT & Status Gizi</span>
+                                        <div class="p-2 border rounded bg-white"><span class="stat-label text-center">IMT & Status Gizi</span>
                                             <div id="det_imt_badge" class="mt-1"></div>
                                         </div>
                                     </div>
@@ -551,7 +534,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="row">
                         <div class="col-md-12">
                             <div class="detail-card mb-0">
@@ -560,17 +542,14 @@
                                     <div class="col-md-6 border-right">
                                         <p class="detail-label"><i class="fas fa-user-md mr-1"></i> Pemeriksa</p>
                                         <p class="detail-value mb-3"><span id="det_dokter"></span> (<span id="det_poli"></span>)</p>
-
                                         <p class="detail-label"><i class="fas fa-comment-medical mr-1"></i> Keluhan Utama</p>
                                         <p class="detail-value font-italic" id="det_keluhan"></p>
                                     </div>
                                     <div class="col-md-6 pl-md-4">
                                         <p class="detail-label"><i class="fas fa-notes-medical mr-1"></i> Diagnosa (ICD-X)</p>
                                         <p class="detail-value text-primary"><span id="det_diagnosa"></span> [<span id="det_icd"></span>]</p>
-
                                         <p class="detail-label"><i class="fas fa-pills mr-1"></i> Terapi / Obat</p>
                                         <p class="detail-value" id="det_obat"></p>
-
                                         <p class="detail-label"><i class="fas fa-user-nurse mr-1"></i> Apoteker</p>
                                         <p class="detail-value" id="det_apoteker"></p>
                                     </div>
@@ -594,69 +573,78 @@
     <script src="../assets/js/paper-dashboard.min.js?v=2.0.1"></script>
 
     <script>
-        // 1. Script Modal Detail
-        $(document).on('click', '.btn-detail', function() {
-            $('#det_nama').text($(this).data('nama'));
-            $('#det_nik').text($(this).data('nik'));
-            $('#det_erm').text($(this).data('erm') || '-');
-            $('#det_jk').text($(this).data('jk'));
-            $('#det_ibu').text($(this).data('ibu'));
-            $('#det_umur').text($(this).data('umur'));
-            $('#det_tgl').text($(this).data('tgl'));
-            $('#det_alamat').text($(this).data('alamat'));
-            $('#det_berat').text($(this).data('berat') + ' Kg');
-            $('#det_tinggi').text($(this).data('tinggi') + ' Cm');
-            $('#det_suhu').text($(this).data('suhu') + ' °C');
-            $('#det_poli').text($(this).data('poli'));
-            $('#det_dokter').text($(this).data('dokter'));
-            $('#det_keluhan').text($(this).data('keluhan') || '-');
-            $('#det_diagnosa').text($(this).data('diagnosa') || '-');
-            $('#det_icd').text($(this).data('icd') || '-');
-            $('#det_obat').text($(this).data('obat') || '-');
-            $('#det_apoteker').text($(this).data('apoteker') || '-');
+        $(document).ready(function() {
 
-            var imtStatus = $(this).data('imt');
-            var badgeClass = 'badge-secondary';
-            if (imtStatus.includes('Baik')) badgeClass = 'badge-success';
-            else if (imtStatus.includes('Kurang')) badgeClass = 'badge-warning';
-            else if (imtStatus.includes('Lebih') || imtStatus.includes('Obesitas')) badgeClass = 'badge-danger';
+            // --- SCRIPT SEARCH / PENCARIAN ---
+            $("#searchInput").on("keyup", function() {
+                var value = $(this).val().toLowerCase();
+                $("#dataTable tbody tr").filter(function() {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                });
+            });
 
-            $('#det_imt_badge').html('<span class="badge ' + badgeClass + '" style="font-size:14px; padding:8px 12px; border-radius:20px;">' + imtStatus + '</span>');
+            // Script Modal Detail (Sama seperti sebelumnya)
+            $(document).on('click', '.btn-detail', function() {
+                $('#det_nama').text($(this).data('nama'));
+                $('#det_nik').text($(this).data('nik'));
+                $('#det_erm').text($(this).data('erm') || '-');
+                $('#det_jk').text($(this).data('jk'));
+                $('#det_ibu').text($(this).data('ibu'));
+                $('#det_umur').text($(this).data('umur'));
+                $('#det_tgl').text($(this).data('tgl'));
+                $('#det_alamat').text($(this).data('alamat'));
+                $('#det_berat').text($(this).data('berat') + ' Kg');
+                $('#det_tinggi').text($(this).data('tinggi') + ' Cm');
+                $('#det_suhu').text($(this).data('suhu') + ' °C');
+                $('#det_poli').text($(this).data('poli'));
+                $('#det_dokter').text($(this).data('dokter'));
+                $('#det_keluhan').text($(this).data('keluhan') || '-');
+                $('#det_diagnosa').text($(this).data('diagnosa') || '-');
+                $('#det_icd').text($(this).data('icd') || '-');
+                $('#det_obat').text($(this).data('obat') || '-');
+                $('#det_apoteker').text($(this).data('apoteker') || '-');
+
+                var imtStatus = $(this).data('imt');
+                var badgeClass = 'badge-secondary';
+                if (imtStatus.includes('Baik')) badgeClass = 'badge-success';
+                else if (imtStatus.includes('Kurang')) badgeClass = 'badge-warning';
+                else if (imtStatus.includes('Lebih') || imtStatus.includes('Obesitas')) badgeClass = 'badge-danger';
+
+                $('#det_imt_badge').html('<span class="badge ' + badgeClass + '" style="font-size:14px; padding:8px 12px; border-radius:20px;">' + imtStatus + '</span>');
+            });
+
+            // Script Modal Edit
+            $(document).on('click', '.btn-edit', function() {
+                var id = $(this).data('id');
+                var url = "{{ route('balita.update', ':id') }}";
+                url = url.replace(':id', id);
+                $('#formEdit').attr('action', url);
+
+                $('#edit_ibu').val($(this).data('ibu_id'));
+                $('#edit_nama').val($(this).data('nama'));
+                $('#edit_nik').val($(this).data('nik'));
+                $('#edit_erm').val($(this).data('erm'));
+                $('#edit_jk').val($(this).data('jk'));
+                $('#edit_umur').val($(this).data('umur'));
+                $('#edit_tgl').val($(this).data('tgl'));
+                $('#edit_alamat').val($(this).data('alamat'));
+                $('#edit_berat').val($(this).data('berat'));
+                $('#edit_tinggi').val($(this).data('tinggi'));
+                $('#edit_imt').val($(this).data('imt'));
+                $('#edit_poli').val($(this).data('poli'));
+                $('#edit_dokter').val($(this).data('dokter'));
+                $('#edit_suhu').val($(this).data('suhu'));
+                $('#edit_keluhan').val($(this).data('keluhan'));
+                $('#edit_diagnosa').val($(this).data('diagnosa'));
+                $('#edit_icd').val($(this).data('icd'));
+                $('#edit_obat').val($(this).data('obat'));
+                $('#edit_apoteker').val($(this).data('apoteker'));
+            });
         });
 
-        // 2. Script Modal Edit
-        $(document).on('click', '.btn-edit', function() {
-            var id = $(this).data('id');
-            var url = "{{ route('balita.update', ':id') }}";
-            url = url.replace(':id', id);
-            $('#formEdit').attr('action', url);
-
-            $('#edit_ibu').val($(this).data('ibu_id'));
-            $('#edit_nama').val($(this).data('nama'));
-            $('#edit_nik').val($(this).data('nik'));
-            $('#edit_erm').val($(this).data('erm'));
-            $('#edit_jk').val($(this).data('jk'));
-            $('#edit_umur').val($(this).data('umur'));
-            $('#edit_tgl').val($(this).data('tgl'));
-            $('#edit_alamat').val($(this).data('alamat'));
-            $('#edit_berat').val($(this).data('berat'));
-            $('#edit_tinggi').val($(this).data('tinggi'));
-            $('#edit_imt').val($(this).data('imt'));
-            $('#edit_poli').val($(this).data('poli'));
-            $('#edit_dokter').val($(this).data('dokter'));
-            $('#edit_suhu').val($(this).data('suhu'));
-            $('#edit_keluhan').val($(this).data('keluhan'));
-            $('#edit_diagnosa').val($(this).data('diagnosa'));
-            $('#edit_icd').val($(this).data('icd'));
-            $('#edit_obat').val($(this).data('obat'));
-            $('#edit_apoteker').val($(this).data('apoteker'));
-        });
-
-        // 3. Kalkulasi IMT
         function calcIMT(prefix) {
             let berat = parseFloat(document.getElementById(prefix + '_berat').value);
             let tinggi = parseFloat(document.getElementById(prefix + '_tinggi').value);
-
             if (berat > 0 && tinggi > 0) {
                 let tinggiM = tinggi / 100;
                 let imt = berat / (tinggiM * tinggiM);
@@ -664,14 +652,12 @@
                 if (imt < 18.5) status = 'Gizi Kurang';
                 else if (imt >= 18.5 && imt <= 25) status = 'Gizi Baik';
                 else status = 'Gizi Lebih';
-
                 document.getElementById(prefix + '_imt').value = imt.toFixed(2) + ' (' + status + ')';
             } else {
                 document.getElementById(prefix + '_imt').value = '';
             }
         }
 
-        // 4. Konfirmasi Hapus
         function confirmDelete(id) {
             Swal.fire({
                 title: 'Hapus Data?',
@@ -686,6 +672,13 @@
                 }
             });
         }
+
+        @if(session('success')) Swal.fire({
+            icon: 'success',
+            title: 'Berhasil',
+            text: "{{ session('success') }}"
+        });
+        @endif
     </script>
 </body>
 

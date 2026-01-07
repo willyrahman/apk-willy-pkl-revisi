@@ -31,6 +31,26 @@
         .modal-backdrop {
             z-index: 1040 !important;
         }
+
+        /* Style untuk Search Box */
+        .search-box {
+            position: relative;
+            max-width: 250px;
+            margin-right: 15px;
+        }
+
+        .search-box input {
+            padding-right: 35px;
+            /* Ruang untuk ikon */
+            border-radius: 20px;
+        }
+
+        .search-box i {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            color: #999;
+        }
     </style>
 </head>
 
@@ -48,13 +68,24 @@
                         <div class="card">
                             <div class="card-header d-flex justify-content-between align-items-center">
                                 <h4 class="card-title">Data Pasien ODGJ</h4>
-                                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addPasienModal">
-                                    <i class="nc-icon nc-simple-add"></i>&nbsp; Tambah Pasien
-                                </button>
+
+                                {{-- AREA TOMBOL DAN SEARCH --}}
+                                <div class="d-flex align-items-center">
+                                    {{-- Input Search --}}
+                                    <div class="search-box">
+                                        <input type="text" id="searchInput" class="form-control" placeholder="Cari data pasien...">
+                                        <i class="nc-icon nc-zoom-split"></i>
+                                    </div>
+
+                                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addPasienModal">
+                                        <i class="nc-icon nc-simple-add"></i>&nbsp; Tambah Pasien
+                                    </button>
+                                </div>
                             </div>
                             <div class="card-body">
                                 <div class="table-responsive">
-                                    <table class="table table-hover">
+                                    {{-- Tambahkan ID pada tabel untuk selector jQuery --}}
+                                    <table class="table table-hover" id="dataTable">
                                         <thead class="text-primary">
                                             <tr>
                                                 <th class="text-center">No</th>
@@ -92,9 +123,7 @@
                                                 <td>{{ $item->diagnosis }}</td>
                                                 <td>{{ $item->jadwal_kontrol }}</td>
                                                 <td>{{ $item->keterangan }}</td>
-
                                                 <td>{{ $item->tanggal_kontrol ? \Carbon\Carbon::parse($item->tanggal_kontrol)->translatedFormat('d F Y') : '-' }}</td>
-
                                                 <td class="text-center">
                                                     {{-- TOMBOL DETAIL --}}
                                                     <button class="btn btn-info btn-sm btn-detail"
@@ -112,7 +141,6 @@
                                                         data-diagnosis="{{ $item->diagnosis }}"
                                                         data-kontrol="{{ $item->jadwal_kontrol }}"
                                                         data-ket="{{ $item->keterangan }}"
-                                                        /* PERUBAHAN 3: Menambah Data Attribute Tanggal Kontrol */
                                                         data-tgl-kontrol="{{ $item->tanggal_kontrol ? \Carbon\Carbon::parse($item->tanggal_kontrol)->translatedFormat('d F Y') : '-' }}">
                                                         <i class="fa fa-info-circle"></i>
                                                     </button>
@@ -133,7 +161,6 @@
                                                         data-jadwal="{{ $item->jadwal_kontrol }}"
                                                         data-diagnosis="{{ $item->diagnosis }}"
                                                         data-ket="{{ $item->keterangan }}"
-                                                        /* PERUBAHAN 4: Menambah Data Attribute Tanggal Kontrol (Raw format Y-m-d untuk input date) */
                                                         data-tgl-kontrol="{{ $item->tanggal_kontrol }}">
                                                         <i class="fa fa-edit"></i>
                                                     </button>
@@ -215,7 +242,7 @@
                                 </div>
                             </div>
                             <div class="col-md-6">
-                                <div class="form-group"><label>Jadwal Kontrol (Bulan)</label>
+                                <div class="form-group"><label>Jadwal Kontrol</label>
                                     <select class="form-control" name="jadwal_kontrol" required>
                                         <option value="">Pilih Bulan</option>
                                         @foreach(['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'] as $bulan)
@@ -227,12 +254,10 @@
                         </div>
                         <div class="form-group"><label>Diagnosis</label><input type="text" class="form-control" name="diagnosis"></div>
                         <div class="form-group"><label>Keterangan</label><textarea class="form-control" name="keterangan" rows="2"></textarea></div>
-
                         <div class="form-group">
                             <label>Tanggal Kontrol</label>
                             <input type="date" class="form-control" name="tanggal_kontrol">
                         </div>
-
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
@@ -298,7 +323,7 @@
                                 </div>
                             </div>
                             <div class="col-md-6">
-                                <div class="form-group"><label>Jadwal Kontrol (Bulan)</label>
+                                <div class="form-group"><label>Jadwal Kontrol</label>
                                     <select class="form-control" id="edit_jadwal" name="jadwal_kontrol" required>
                                         @foreach(['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'] as $bulan)
                                         <option value="{{ $bulan }}">{{ $bulan }}</option>
@@ -309,7 +334,6 @@
                         </div>
                         <div class="form-group"><label>Diagnosis</label><input type="text" class="form-control" id="edit_diagnosis" name="diagnosis"></div>
                         <div class="form-group"><label>Keterangan</label><textarea class="form-control" id="edit_ket" name="keterangan" rows="2"></textarea></div>
-
                         <div class="form-group">
                             <label>Tanggal Kontrol</label>
                             <input type="date" class="form-control" id="edit_tgl_kontrol" name="tanggal_kontrol">
@@ -400,6 +424,15 @@
 
     <script>
         $(document).ready(function() {
+
+            // --- SCRIPT SEARCH / PENCARIAN ---
+            $("#searchInput").on("keyup", function() {
+                var value = $(this).val().toLowerCase();
+                $("#dataTable tbody tr").filter(function() {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                });
+            });
+
             // Script Detail Modal
             $(document).on('click', '.btn-detail', function() {
                 $('#d-nik').text($(this).data('nik'));
@@ -413,8 +446,6 @@
                 $('#d-diagnosis').text($(this).data('diagnosis'));
                 $('#d-kontrol').text($(this).data('kontrol'));
                 $('#d-ket').text($(this).data('ket'));
-
-                // PERUBAHAN 8: Set text Tanggal Kontrol di Detail Modal
                 $('#d-tgl-kontrol').text($(this).data('tgl-kontrol'));
             });
 
@@ -436,8 +467,6 @@
                 $('#edit_jadwal').val($(this).data('jadwal'));
                 $('#edit_diagnosis').val($(this).data('diagnosis'));
                 $('#edit_ket').val($(this).data('ket'));
-
-                // PERUBAHAN 9: Set value Tanggal Kontrol di Edit Modal
                 $('#edit_tgl_kontrol').val($(this).data('tgl-kontrol'));
             });
         });

@@ -105,6 +105,25 @@
         .modal-backdrop {
             z-index: 1040 !important;
         }
+
+        /* Style Search Box */
+        .search-box {
+            position: relative;
+            max-width: 250px;
+            margin-right: 15px;
+        }
+
+        .search-box input {
+            padding-right: 35px;
+            border-radius: 20px;
+        }
+
+        .search-box i {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            color: #999;
+        }
     </style>
 </head>
 
@@ -116,33 +135,46 @@
         <div class="main-panel">
             @include('navbar')
             <div class="content">
+
+                @if ($errors->any())
+                <div class="alert alert-danger">
+                    <ul>
+                        @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+                @endif
+
+                @if(session('error'))
+                <div class="alert alert-danger">
+                    {{ session('error') }}
+                </div>
+                @endif
+
                 <div class="row">
                     <div class="col-md-12">
-                        @if ($errors->any())
-                        <div class="alert alert-danger">
-                            <ul>
-                                @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
-                        @endif
-
-                        @if(session('error'))
-                        <div class="alert alert-danger">
-                            {{ session('error') }}
-                        </div>
-                        @endif
                         <div class="card">
                             <div class="card-header d-flex justify-content-between align-items-center">
                                 <h4 class="card-title">Data Kesehatan Lansia</h4>
-                                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addLansiaModal">
-                                    <i class="nc-icon nc-simple-add"></i> Tambah Data
-                                </button>
+
+                                {{-- AREA TOMBOL DAN SEARCH --}}
+                                <div class="d-flex align-items-center">
+                                    {{-- Input Search --}}
+                                    <div class="search-box">
+                                        <input type="text" id="searchInput" class="form-control" placeholder="Cari data lansia...">
+                                        <i class="nc-icon nc-zoom-split"></i>
+                                    </div>
+
+                                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addLansiaModal">
+                                        <i class="nc-icon nc-simple-add"></i> Tambah Data
+                                    </button>
+                                </div>
                             </div>
                             <div class="card-body">
                                 <div class="table-responsive">
-                                    <table class="table table-bordered">
+                                    {{-- Tambahkan ID pada tabel untuk selector jQuery --}}
+                                    <table class="table table-bordered" id="dataTable">
                                         <thead class="text-primary font-weight-bold">
                                             <tr>
                                                 <th>No</th>
@@ -163,7 +195,6 @@
                                             @foreach($lansias as $index => $item)
                                             <tr>
                                                 <td>{{ $index + 1 }}</td>
-
                                                 <td class="text-left">
                                                     @if($item->hipertensi)
                                                     <span class="font-weight-bold text-primary">{{ $item->hipertensi->nama_pasien }}</span><br>
@@ -172,7 +203,6 @@
                                                     <span class="text-muted text-center d-block">-</span>
                                                     @endif
                                                 </td>
-
                                                 <td class="text-left">
                                                     {{ $item->nama_lengkap }} <br>
                                                     <small class="text-muted">Lansia RM: {{ $item->no_e_rekam_medis ?? '-' }}</small>
@@ -187,7 +217,6 @@
                                                 </td>
                                                 <td>{{ $item->sistole }}/{{ $item->diastole }}</td>
                                                 <td>{{ $item->gds }} / {{ $item->kolesterol }}</td>
-
                                                 <td class="text-left">
                                                     <span class="badge-style {{ $item->merokok == 'Ya' ? 'text-danger' : 'text-success' }}">
                                                         <i class="fas fa-smoking"></i> Rokok: {{ $item->merokok ?? '-' }}
@@ -199,9 +228,7 @@
                                                         <i class="fas fa-walking"></i> Kurang Aktif: {{ $item->kurang_aktifitas_fisik ?? '-' }}
                                                     </span>
                                                 </td>
-
                                                 <td>
-                                                    {{-- TOMBOL DETAIL --}}
                                                     <button class="btn btn-info btn-sm btn-icon btn-detail"
                                                         data-toggle="modal" data-target="#detailLansiaModal"
                                                         data-nama="{{ $item->nama_lengkap }}"
@@ -306,19 +333,12 @@
                         </div>
                         <div class="row">
                             <div class="col-md-12">
-                                <div class="form-group">
-                                    <label>Pilih Pasien Hipertensi (Opsional)</label>
-                                    <select class="form-control" name="hipertensi_id">
-                                        <option value="">-- Tidak Terhubung / Pasien Baru --</option>
-                                        @foreach($hipertensis as $h)
-                                        <option value="{{ $h->id }}">{{ $h->nama_pasien }} - (RM: {{ $h->no_e_rekam_medis ?? 'Tanpa RM' }})</option>
-                                        @endforeach
-                                    </select>
-                                </div>
+                                <div class="form-group"><label>Pilih Pasien Hipertensi (Opsional)</label><select class="form-control" name="hipertensi_id">
+                                        <option value="">-- Tidak Terhubung / Pasien Baru --</option>@foreach($hipertensis as $h)<option value="{{ $h->id }}">{{ $h->nama_pasien }} - (RM: {{ $h->no_e_rekam_medis ?? 'Tanpa RM' }})</option>@endforeach
+                                    </select></div>
                             </div>
                         </div>
                         <hr>
-
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group"><label>Nama Lengkap</label><input type="text" class="form-control" name="nama_lengkap" required></div>
@@ -440,7 +460,6 @@
                                     </select></div>
                             </div>
                         </div>
-
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group"><label>Riwayat Penyakit Sendiri</label><input type="text" class="form-control" name="riwayat_penyakit_sendiri"></div>
@@ -471,24 +490,15 @@
                 <form id="editForm" method="POST">
                     @csrf @method('PUT')
                     <div class="modal-body">
-                        <div class="alert alert-warning py-2">
-                            <i class="fas fa-link"></i> Update Link Data Hipertensi
-                        </div>
+                        <div class="alert alert-warning py-2"><i class="fas fa-link"></i> Update Link Data Hipertensi</div>
                         <div class="row">
                             <div class="col-md-12">
-                                <div class="form-group">
-                                    <label>Pilih Pasien Hipertensi</label>
-                                    <select class="form-control" name="hipertensi_id" id="edit_hipertensi">
-                                        <option value="">-- Tidak Terhubung --</option>
-                                        @foreach($hipertensis as $h)
-                                        <option value="{{ $h->id }}">{{ $h->nama_pasien }} - (RM: {{ $h->no_e_rekam_medis ?? 'Tanpa RM' }})</option>
-                                        @endforeach
-                                    </select>
-                                </div>
+                                <div class="form-group"><label>Pilih Pasien Hipertensi</label><select class="form-control" name="hipertensi_id" id="edit_hipertensi">
+                                        <option value="">-- Tidak Terhubung --</option>@foreach($hipertensis as $h)<option value="{{ $h->id }}">{{ $h->nama_pasien }} - (RM: {{ $h->no_e_rekam_medis ?? 'Tanpa RM' }})</option>@endforeach
+                                    </select></div>
                             </div>
                         </div>
                         <hr>
-
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group"><label>Nama Lengkap</label><input type="text" class="form-control" name="nama_lengkap" id="edit_nama" required></div>
@@ -609,7 +619,6 @@
                                     </select></div>
                             </div>
                         </div>
-
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group"><label>Riwayat Penyakit Sendiri</label><input type="text" class="form-control" name="riwayat_penyakit_sendiri" id="edit_r_sendiri"></div>
@@ -618,7 +627,6 @@
                                 <div class="form-group"><label>Riwayat Penyakit Keluarga</label><input type="text" class="form-control" name="riwayat_penyakit_keluarga" id="edit_r_keluarga"></div>
                             </div>
                         </div>
-
                         <input type="hidden" name="depresi" id="edit_depresi">
                     </div>
                     <div class="modal-footer">
@@ -746,105 +754,108 @@
     <script src="../assets/js/paper-dashboard.min.js?v=2.0.1"></script>
 
     <script>
-        // SCRIPT MODAL DETAIL
-        $(document).on('click', '.btn-detail', function() {
-            // ... (Kode detail lainnya) ...
-            $('#d_nama').text($(this).data('nama'));
-            $('#d_nik').text($(this).data('nik'));
-            $('#d_erm').text($(this).data('erm') || '-');
-            $('#d_tgl').text($(this).data('tgl'));
-            $('#d_ttl').text($(this).data('ttl'));
-            $('#d_umur').text($(this).data('umur') + ' Tahun');
-            $('#d_jk').text($(this).data('jk'));
+        $(document).ready(function() {
 
-            // LINK HIPERTENSI
-            $('#d_link').text($(this).data('link'));
+            // --- SCRIPT SEARCH / PENCARIAN ---
+            $("#searchInput").on("keyup", function() {
+                var value = $(this).val().toLowerCase();
+                $("#dataTable tbody tr").filter(function() {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                });
+            });
 
-            $('#d_alamat').text($(this).data('alamat'));
-            $('#d_bb').text($(this).data('bb'));
-            $('#d_tb').text($(this).data('tb'));
-            $('#d_imt').text($(this).data('imt'));
-            $('#d_gizi').text($(this).data('gizi'));
-            $('#d_gds').text(($(this).data('gds') || '-') + ' mg/dL');
-            $('#d_chol').text(($(this).data('chol') || '-') + ' mg/dL');
+            // SCRIPT MODAL DETAIL
+            $(document).on('click', '.btn-detail', function() {
+                $('#d_nama').text($(this).data('nama'));
+                $('#d_nik').text($(this).data('nik'));
+                $('#d_erm').text($(this).data('erm') || '-');
+                $('#d_tgl').text($(this).data('tgl'));
+                $('#d_ttl').text($(this).data('ttl'));
+                $('#d_umur').text($(this).data('umur') + ' Tahun');
+                $('#d_jk').text($(this).data('jk'));
+                $('#d_link').text($(this).data('link'));
+                $('#d_alamat').text($(this).data('alamat'));
+                $('#d_bb').text($(this).data('bb'));
+                $('#d_tb').text($(this).data('tb'));
+                $('#d_imt').text($(this).data('imt'));
+                $('#d_gizi').text($(this).data('gizi'));
+                $('#d_gds').text(($(this).data('gds') || '-') + ' mg/dL');
+                $('#d_chol').text(($(this).data('chol') || '-') + ' mg/dL');
 
-            // WARNA TENSI
-            var tensiRaw = $(this).data('tensi');
-            $('#d_tensi').text(tensiRaw + ' mmHg');
-            var parts = tensiRaw.split('/');
-            var sistole = parseInt(parts[0]);
-            var diastole = parseInt(parts[1]);
-            $('#d_tensi').removeClass('text-success text-danger text-warning');
-            $('#tensi_box').removeClass('border-danger border-success');
-            $('#tensi_label').removeClass('text-danger text-success').text('Tensi');
-            if (sistole >= 140 || diastole >= 90) {
-                $('#d_tensi').addClass('text-danger');
-                $('#tensi_box').addClass('border-danger');
-                $('#tensi_label').addClass('text-danger').text('Tensi (Tinggi)');
-            } else if (sistole < 90 || diastole < 60) {
-                $('#d_tensi').addClass('text-warning');
-                $('#tensi_label').text('Tensi (Rendah)');
-            } else {
-                $('#d_tensi').addClass('text-success');
-                $('#tensi_box').addClass('border-success');
-                $('#tensi_label').addClass('text-success').text('Tensi (Normal)');
-            }
+                var tensiRaw = $(this).data('tensi');
+                $('#d_tensi').text(tensiRaw + ' mmHg');
+                var parts = tensiRaw.split('/');
+                var sistole = parseInt(parts[0]);
+                var diastole = parseInt(parts[1]);
+                $('#d_tensi').removeClass('text-success text-danger text-warning');
+                $('#tensi_box').removeClass('border-danger border-success');
+                $('#tensi_label').removeClass('text-danger text-success').text('Tensi');
+                if (sistole >= 140 || diastole >= 90) {
+                    $('#d_tensi').addClass('text-danger');
+                    $('#tensi_box').addClass('border-danger');
+                    $('#tensi_label').addClass('text-danger').text('Tensi (Tinggi)');
+                } else if (sistole < 90 || diastole < 60) {
+                    $('#d_tensi').addClass('text-warning');
+                    $('#tensi_label').text('Tensi (Rendah)');
+                } else {
+                    $('#d_tensi').addClass('text-success');
+                    $('#tensi_box').addClass('border-success');
+                    $('#tensi_label').addClass('text-success').text('Tensi (Normal)');
+                }
 
-            // BADGE YA/TIDAK
-            function formatYaTidak(val) {
-                if (!val) return '-';
-                return val === 'Ya' ? '<span class="badge badge-danger">Ya</span>' : '<span class="badge badge-success">Tidak</span>';
-            }
-            $('#d_merokok').html(formatYaTidak($(this).data('merokok')));
-            $('#d_depresi').html(formatYaTidak($(this).data('depresi')));
-            $('#d_sayur').html(formatYaTidak($(this).data('sayur')));
-            $('#d_aktif').html(formatYaTidak($(this).data('aktif')));
+                function formatYaTidak(val) {
+                    if (!val) return '-';
+                    return val === 'Ya' ? '<span class="badge badge-danger">Ya</span>' : '<span class="badge badge-success">Tidak</span>';
+                }
+                $('#d_merokok').html(formatYaTidak($(this).data('merokok')));
+                $('#d_depresi').html(formatYaTidak($(this).data('depresi')));
+                $('#d_sayur').html(formatYaTidak($(this).data('sayur')));
+                $('#d_aktif').html(formatYaTidak($(this).data('aktif')));
 
-            $('#d_mandiri').text($(this).data('mandiri') || '-');
-            $('#d_mental').text($(this).data('mental') || '-');
-            $('#d_emosi').text($(this).data('emosi') || '-');
-            $('#d_r_sendiri').text($(this).data('r_sendiri') || '-');
-            $('#d_r_keluarga').text($(this).data('r_keluarga') || '-');
-        });
+                $('#d_mandiri').text($(this).data('mandiri') || '-');
+                $('#d_mental').text($(this).data('mental') || '-');
+                $('#d_emosi').text($(this).data('emosi') || '-');
+                $('#d_r_sendiri').text($(this).data('r_sendiri') || '-');
+                $('#d_r_keluarga').text($(this).data('r_keluarga') || '-');
+            });
 
-        // SCRIPT EDIT MODAL
-        $(document).on('click', '.btn-edit', function() {
-            let id = $(this).data('id');
-            let url = "{{ route('lansia.update', ':id') }}";
-            url = url.replace(':id', id);
-            $('#editForm').attr('action', url);
+            // SCRIPT EDIT MODAL
+            $(document).on('click', '.btn-edit', function() {
+                let id = $(this).data('id');
+                let url = "{{ route('lansia.update', ':id') }}";
+                url = url.replace(':id', id);
+                $('#editForm').attr('action', url);
 
-            // ISI DATA DROPDOWN HIPERTENSI
-            $('#edit_hipertensi').val($(this).data('hipertensi'));
-
-            $('#edit_nama').val($(this).data('nama'));
-            $('#edit_nik').val($(this).data('nik'));
-            $('#edit_erm').val($(this).data('erm'));
-            $('#edit_kunjungan').val($(this).data('tgl_kunjungan'));
-            $('#edit_umur').val($(this).data('umur'));
-            $('#edit_alamat').val($(this).data('alamat'));
-            $('#edit_tempat_lahir').val($(this).data('tempat_lahir'));
-            $('#edit_tgl_lahir').val($(this).data('tgl_lahir'));
-            $('#edit_jk').val($(this).data('jk'));
-            $('#edit_kelurahan').val($(this).data('kelurahan'));
-            $('#edit_berat').val($(this).data('bb'));
-            $('#edit_tinggi').val($(this).data('tb'));
-            $('#edit_imt').val($(this).data('imt'));
-            $('#edit_status').val($(this).data('gizi'));
-            $('#edit_lingkar').val($(this).data('lingkar'));
-            $('#edit_merokok').val($(this).data('merokok'));
-            $('#edit_sayur').val($(this).data('sayur'));
-            $('#edit_aktif').val($(this).data('aktif'));
-            $('#edit_depresi').val($(this).data('depresi'));
-            $('#edit_sistole').val($(this).data('sistole'));
-            $('#edit_diastole').val($(this).data('diastole'));
-            $('#edit_gds').val($(this).data('gds'));
-            $('#edit_chol').val($(this).data('chol'));
-            $('#edit_mandiri').val($(this).data('mandiri'));
-            $('#edit_mental').val($(this).data('mental'));
-            $('#edit_emosi').val($(this).data('emosi'));
-            $('#edit_r_sendiri').val($(this).data('r_sendiri'));
-            $('#edit_r_keluarga').val($(this).data('r_keluarga'));
+                $('#edit_hipertensi').val($(this).data('hipertensi'));
+                $('#edit_nama').val($(this).data('nama'));
+                $('#edit_nik').val($(this).data('nik'));
+                $('#edit_erm').val($(this).data('erm'));
+                $('#edit_kunjungan').val($(this).data('tgl_kunjungan'));
+                $('#edit_umur').val($(this).data('umur'));
+                $('#edit_alamat').val($(this).data('alamat'));
+                $('#edit_tempat_lahir').val($(this).data('tempat_lahir'));
+                $('#edit_tgl_lahir').val($(this).data('tgl_lahir'));
+                $('#edit_jk').val($(this).data('jk'));
+                $('#edit_kelurahan').val($(this).data('kelurahan'));
+                $('#edit_berat').val($(this).data('bb'));
+                $('#edit_tinggi').val($(this).data('tb'));
+                $('#edit_imt').val($(this).data('imt'));
+                $('#edit_status').val($(this).data('gizi'));
+                $('#edit_lingkar').val($(this).data('lingkar'));
+                $('#edit_merokok').val($(this).data('merokok'));
+                $('#edit_sayur').val($(this).data('sayur'));
+                $('#edit_aktif').val($(this).data('aktif'));
+                $('#edit_depresi').val($(this).data('depresi'));
+                $('#edit_sistole').val($(this).data('sistole'));
+                $('#edit_diastole').val($(this).data('diastole'));
+                $('#edit_gds').val($(this).data('gds'));
+                $('#edit_chol').val($(this).data('chol'));
+                $('#edit_mandiri').val($(this).data('mandiri'));
+                $('#edit_mental').val($(this).data('mental'));
+                $('#edit_emosi').val($(this).data('emosi'));
+                $('#edit_r_sendiri').val($(this).data('r_sendiri'));
+                $('#edit_r_keluarga').val($(this).data('r_keluarga'));
+            });
         });
 
         // FUNGSI HITUNG IMT
