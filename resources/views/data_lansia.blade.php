@@ -118,6 +118,21 @@
             <div class="content">
                 <div class="row">
                     <div class="col-md-12">
+                        @if ($errors->any())
+                        <div class="alert alert-danger">
+                            <ul>
+                                @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                        @endif
+
+                        @if(session('error'))
+                        <div class="alert alert-danger">
+                            {{ session('error') }}
+                        </div>
+                        @endif
                         <div class="card">
                             <div class="card-header d-flex justify-content-between align-items-center">
                                 <h4 class="card-title">Data Kesehatan Lansia</h4>
@@ -172,6 +187,7 @@
                                                 </td>
                                                 <td>{{ $item->sistole }}/{{ $item->diastole }}</td>
                                                 <td>{{ $item->gds }} / {{ $item->kolesterol }}</td>
+
                                                 <td class="text-left">
                                                     <span class="badge-style {{ $item->merokok == 'Ya' ? 'text-danger' : 'text-success' }}">
                                                         <i class="fas fa-smoking"></i> Rokok: {{ $item->merokok ?? '-' }}
@@ -183,7 +199,9 @@
                                                         <i class="fas fa-walking"></i> Kurang Aktif: {{ $item->kurang_aktifitas_fisik ?? '-' }}
                                                     </span>
                                                 </td>
+
                                                 <td>
+                                                    {{-- TOMBOL DETAIL --}}
                                                     <button class="btn btn-info btn-sm btn-icon btn-detail"
                                                         data-toggle="modal" data-target="#detailLansiaModal"
                                                         data-nama="{{ $item->nama_lengkap }}"
@@ -221,9 +239,7 @@
                                                         data-nama="{{ $item->nama_lengkap }}"
                                                         data-nik="{{ $item->nik }}"
                                                         data-erm="{{ $item->no_e_rekam_medis }}"
-                                                        /* DATA UNTUK EDIT LINK HIPERTENSI */
                                                         data-hipertensi="{{ $item->hipertensi_id }}"
-
                                                         data-tgl_kunjungan="{{ $item->tanggal_kunjungan }}"
                                                         data-umur="{{ $item->umur }}"
                                                         data-alamat="{{ $item->alamat }}"
@@ -424,6 +440,15 @@
                                     </select></div>
                             </div>
                         </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group"><label>Riwayat Penyakit Sendiri</label><input type="text" class="form-control" name="riwayat_penyakit_sendiri"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group"><label>Riwayat Penyakit Keluarga</label><input type="text" class="form-control" name="riwayat_penyakit_keluarga"></div>
+                            </div>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
@@ -584,8 +609,16 @@
                                     </select></div>
                             </div>
                         </div>
-                        <input type="hidden" name="riwayat_penyakit_sendiri" id="edit_r_sendiri">
-                        <input type="hidden" name="riwayat_penyakit_keluarga" id="edit_r_keluarga">
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group"><label>Riwayat Penyakit Sendiri</label><input type="text" class="form-control" name="riwayat_penyakit_sendiri" id="edit_r_sendiri"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group"><label>Riwayat Penyakit Keluarga</label><input type="text" class="form-control" name="riwayat_penyakit_keluarga" id="edit_r_keluarga"></div>
+                            </div>
+                        </div>
+
                         <input type="hidden" name="depresi" id="edit_depresi">
                     </div>
                     <div class="modal-footer">
@@ -680,6 +713,20 @@
                                         <p class="small font-weight-bold mb-0"><span id="d_mental"></span> / <span id="d_emosi"></span></p>
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <div class="detail-card mb-0 h-100">
+                                <h6 class="section-title-custom"><i class="fas fa-history detail-icon"></i>Riwayat Sendiri</h6>
+                                <p class="small text-muted mb-0" id="d_r_sendiri"></p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="detail-card mb-0 h-100">
+                                <h6 class="section-title-custom"><i class="fas fa-users detail-icon"></i>Riwayat Keluarga</h6>
+                                <p class="small text-muted mb-0" id="d_r_keluarga"></p>
                             </div>
                         </div>
                     </div>
@@ -800,7 +847,7 @@
             $('#edit_r_keluarga').val($(this).data('r_keluarga'));
         });
 
-        // FUNGSI HITUNG IMT (Sama seperti sebelumnya)
+        // FUNGSI HITUNG IMT
         function getStatusGizi(imt) {
             if (imt < 18.5) return "Kurus (Kekurangan BB)";
             if (imt >= 18.5 && imt <= 25) return "Normal (Ideal)";
