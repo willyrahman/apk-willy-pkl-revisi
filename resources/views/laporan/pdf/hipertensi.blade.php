@@ -8,7 +8,8 @@
     <style>
         body {
             font-family: "Times New Roman", serif;
-            font-size: 12px;
+            font-size: 10px;
+            /* Font agak kecil agar muat banyak kolom */
             margin: 0;
             padding: 0;
         }
@@ -69,11 +70,22 @@
         /* ===== JUDUL ===== */
         .judul {
             text-align: center;
-            margin-bottom: 15px;
-            text-transform: uppercase;
-            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .judul-utama {
             font-size: 14px;
+            font-weight: bold;
+            text-transform: uppercase;
             text-decoration: underline;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .sub-judul {
+            font-size: 11px;
+            font-weight: normal;
+            font-style: italic;
         }
 
         /* ===== TABEL DATA ===== */
@@ -86,9 +98,7 @@
         .tabel-data th,
         .tabel-data td {
             border: 1px solid #000;
-            padding: 4px;
-            font-size: 10px;
-            /* Font disesuaikan */
+            padding: 3px;
             vertical-align: middle;
             word-wrap: break-word;
         }
@@ -98,6 +108,7 @@
             text-align: center;
             font-weight: bold;
             height: 25px;
+            font-size: 9px;
         }
 
         .center {
@@ -112,6 +123,7 @@
         .ttd-container {
             width: 100%;
             margin-top: 30px;
+            page-break-inside: avoid;
         }
 
         .ttd-table {
@@ -133,7 +145,24 @@
     <table class="kop-table">
         <tr>
             <td class="kop-logo">
-                <img src="{{ asset('images/logo.png') }}" width="70px" height="auto">
+                <?php
+                // TEKNIK BASE64 AGAR LOGO MUNCUL DI SEMUA ENVIRONMENT
+                // Gunakan variabel $logoData (bukan $data) agar tidak konflik
+                $path = public_path('images/logo.png');
+                $base64 = '';
+
+                if (file_exists($path)) {
+                    $type = pathinfo($path, PATHINFO_EXTENSION);
+                    $logoData = file_get_contents($path);
+                    $base64 = 'data:image/' . $type . ';base64,' . base64_encode($logoData);
+                }
+                ?>
+
+                @if($base64)
+                <img src="{{ $base64 }}" width="70px" height="auto" alt="Logo">
+                @else
+                <span style="color:red; font-size:10px;">Logo Not Found</span>
+                @endif
             </td>
             <td class="kop-text">
                 <h2>PEMERINTAH KOTA BANJARMASIN</h2>
@@ -145,29 +174,39 @@
     </table>
     <div class="garis-tipis"></div>
 
-    {{-- ================= JUDUL ================= --}}
+    {{-- ================= JUDUL & PERIODE ================= --}}
     <div class="judul">
-        {{ $judul }}
+        <span class="judul-utama">{{ $judul }}</span>
+
+        {{-- Logika Periode --}}
+        @if(!empty($tgl_awal) && !empty($tgl_akhir))
+        <span class="sub-judul">
+            <br>
+            Periode Data:
+            {{ \Carbon\Carbon::parse($tgl_awal)->translatedFormat('d F Y') }}
+            s/d
+            {{ \Carbon\Carbon::parse($tgl_akhir)->translatedFormat('d F Y') }}
+        </span>
+        @endif
     </div>
 
     {{-- ================= TABEL DATA ================= --}}
     <table class="tabel-data">
         <thead>
             <tr>
-                <th width="4%">No</th>
+                <th width="3%">No</th>
                 <th width="8%">Tgl</th>
+                <th width="10%">No e-RM</th> {{-- Pindahkan No RM ke depan agar rapi --}}
                 <th width="12%">Nama Pasien</th>
                 <th width="10%">NIK</th>
-                <th width="4%">JK</th>
+                <th width="3%">JK</th>
                 <th width="8%">No Telp</th>
                 <th width="12%">Alamat</th>
                 <th width="6%">RT/RW</th>
                 <th width="8%">No Asuransi</th>
-                <th width="8%">Skala Nyeri</th>
-                <th width="6%">ICD-X</th>
-                <th width="8%">Diagnosa</th>
-                <th width="6%">Kasus</th>
-                <th width="15%">No E Rekam Medis</th>
+                <th width="5%">Nyeri</th>
+                <th width="5%">ICD-X</th>
+                <th width="10%">Diagnosa</th>
             </tr>
         </thead>
         <tbody>
@@ -175,6 +214,7 @@
             <tr>
                 <td class="center">{{ $index + 1 }}</td>
                 <td class="center">{{ \Carbon\Carbon::parse($item->tanggal)->format('d-m-Y') }}</td>
+                <td class="center">{{ $item->no_e_rekam_medis ?? '-' }}</td>
                 <td class="left">{{ $item->nama_pasien }}</td>
                 <td class="center">{{ $item->nik }}</td>
                 <td class="center">{{ $item->jenis_kelamin }}</td>
@@ -185,8 +225,6 @@
                 <td class="center">{{ $item->skala_nyeri }}</td>
                 <td class="center">{{ $item->icd_x_1 }}</td>
                 <td class="left">{{ $item->diagnosa_1 }}</td>
-                <td class="center">{{ $item->jenis_kasus_1 }}</td>
-                <td class="left">{{ $item->no_e_rekam_medis ?? '-' }}</td>
             </tr>
             @endforeach
         </tbody>

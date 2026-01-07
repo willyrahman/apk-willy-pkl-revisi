@@ -128,4 +128,30 @@ class IbuHamilController extends Controller
             'tgl_akhir' => $request->tgl_akhir
         ]);
     }
+
+    public function exportPdf(Request $request, $jenis)
+    {
+        // 1. TANGKAP INPUT TANGGAL (PENTING!)
+        $tgl_awal = $request->tgl_awal;
+        $tgl_akhir = $request->tgl_akhir;
+
+        // ... (Logika Switch Case Query Anda di sini) ...
+        // Contoh untuk Ibu Hamil:
+        if ($jenis == 'ibuHamil') {
+            $query = \App\Models\IbuHamil::query();
+            if ($tgl_awal && $tgl_akhir) {
+                $query->whereBetween('tgl_pemeriksaan_k6', [$tgl_awal, $tgl_akhir]);
+            }
+            $data = $query->get();
+            $judul = 'Laporan Data Ibu Hamil';
+            $view = 'laporan.pdf_view'; // Sesuaikan nama file view PDF Anda
+        }
+        // ... (Logika jenis lain) ...
+
+        // 2. KIRIM DATA KE VIEW (Pastikan tgl_awal & tgl_akhir masuk compact)
+        $pdf = PDF::loadView($view, compact('data', 'judul', 'tgl_awal', 'tgl_akhir'));
+
+        $pdf->setPaper('a4', 'landscape');
+        return $pdf->stream('Laporan.pdf');
+    }
 }

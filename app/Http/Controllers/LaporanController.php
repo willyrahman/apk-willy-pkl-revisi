@@ -148,19 +148,23 @@ class LaporanController extends Controller
     // --- FITUR EXPORT PDF ---
     public function exportPdf(Request $request, $jenis)
     {
+        // 1. AMBIL VARIABEL TANGGAL DARI REQUEST (PENTING!)
+        $tgl_awal = $request->tgl_awal;
+        $tgl_akhir = $request->tgl_akhir;
+
         $data = [];
         $judul = "";
         $view = "";
 
-        // Tambahkan ini agar tidak memory limit saat data banyak
+        // Setting Memory & Time Limit
         ini_set('memory_limit', '512M');
         ini_set('max_execution_time', '300');
 
         switch ($jenis) {
             case 'ibuHamil':
                 $query = IbuHamil::query();
-                if ($request->filled('tgl_awal') && $request->filled('tgl_akhir')) {
-                    $query->whereBetween('created_at', [$request->tgl_awal, $request->tgl_akhir]);
+                if ($tgl_awal && $tgl_akhir) {
+                    $query->whereBetween('created_at', [$tgl_awal, $tgl_akhir]);
                 }
                 $data = $query->orderBy('created_at', 'desc')->get();
                 $judul = "Laporan Data Ibu Hamil";
@@ -169,18 +173,21 @@ class LaporanController extends Controller
 
             case 'odgj':
                 $query = Odgj::query();
-                if ($request->filled('tgl_awal') && $request->filled('tgl_akhir')) {
-                    $query->whereBetween('created_at', [$request->tgl_awal, $request->tgl_akhir]);
+                if ($tgl_awal && $tgl_akhir) {
+                    // PERBAIKAN 1: Filter berdasarkan 'tanggal_kontrol', BUKAN 'created_at'
+                    // Agar sesuai dengan filter di halaman web
+                    $query->whereBetween('tanggal_kontrol', [$tgl_awal, $tgl_akhir]);
                 }
-                $data = $query->orderBy('created_at', 'desc')->get();
+                // Urutkan juga berdasarkan tanggal kontrol
+                $data = $query->orderBy('tanggal_kontrol', 'desc')->get();
                 $judul = "Laporan Data ODGJ";
                 $view = 'laporan.pdf.odgj';
                 break;
 
             case 'hipertensi':
                 $query = Hipertensi::query();
-                if ($request->filled('tgl_awal') && $request->filled('tgl_akhir')) {
-                    $query->whereBetween('tanggal', [$request->tgl_awal, $request->tgl_akhir]);
+                if ($tgl_awal && $tgl_akhir) {
+                    $query->whereBetween('tanggal', [$tgl_awal, $tgl_akhir]);
                 }
                 $data = $query->orderBy('tanggal', 'desc')->get();
                 $judul = "Laporan Data Hipertensi";
@@ -189,8 +196,8 @@ class LaporanController extends Controller
 
             case 'balita':
                 $query = Balita::with('ibuHamil');
-                if ($request->filled('tgl_awal') && $request->filled('tgl_akhir')) {
-                    $query->whereBetween('tgl_pemeriksaan', [$request->tgl_awal, $request->tgl_akhir]);
+                if ($tgl_awal && $tgl_akhir) {
+                    $query->whereBetween('tgl_pemeriksaan', [$tgl_awal, $tgl_akhir]);
                 }
                 $data = $query->orderBy('tgl_pemeriksaan', 'desc')->get();
                 $judul = "Laporan Data Balita";
@@ -199,8 +206,8 @@ class LaporanController extends Controller
 
             case 'lansia':
                 $query = Lansia::with('hipertensi');
-                if ($request->filled('tgl_awal') && $request->filled('tgl_akhir')) {
-                    $query->whereBetween('tanggal_kunjungan', [$request->tgl_awal, $request->tgl_akhir]);
+                if ($tgl_awal && $tgl_akhir) {
+                    $query->whereBetween('tanggal_kunjungan', [$tgl_awal, $tgl_akhir]);
                 }
                 $data = $query->orderBy('tanggal_kunjungan', 'desc')->get();
                 $judul = "Laporan Data Lansia";
@@ -211,12 +218,15 @@ class LaporanController extends Controller
                 return redirect()->back()->with('error', 'Jenis laporan tidak ditemukan.');
         }
 
-        $pdf = Pdf::loadView($view, compact('data', 'judul'));
+        // 2. KIRIM VARIABEL TANGGAL KE DALAM COMPACT (SOLUSI ERROR ANDA)
+        $pdf = Pdf::loadView($view, compact('data', 'judul', 'tgl_awal', 'tgl_akhir'));
 
         // Aktifkan remote enabled agar gambar dari public_path terbaca
         $pdf->setOptions(['isRemoteEnabled' => true]);
         $pdf->setPaper('A4', 'landscape');
 
-        return $pdf->download("Laporan_{$jenis}_" . date('Y-m-d') . ".pdf");
+        // Gunakan stream() dulu untuk melihat hasilnya di browser (memudahkan debug)
+        // Jika sudah fix, baru ganti ke download()
+        return $pdf->stream("Laporan_{$jenis}_" . date('Y-m-d') . ".pdf");
     }
 }

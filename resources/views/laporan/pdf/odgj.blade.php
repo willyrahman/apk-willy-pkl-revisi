@@ -9,6 +9,7 @@
         body {
             font-family: "Times New Roman", serif;
             font-size: 10px;
+            /* Font agak kecil agar muat banyak kolom */
             margin: 0;
             padding: 0;
         }
@@ -81,7 +82,6 @@
             margin-bottom: 5px;
         }
 
-        /* Style khusus untuk teks periode */
         .sub-judul {
             font-size: 11px;
             font-weight: normal;
@@ -98,8 +98,8 @@
         .tabel-data th,
         .tabel-data td {
             border: 1px solid #000;
-            padding: 3px;
-            font-size: 9px;
+            padding: 4px;
+            /* Padding sedikit lebih besar agar rapi */
             vertical-align: middle;
             word-wrap: break-word;
         }
@@ -109,6 +109,7 @@
             text-align: center;
             font-weight: bold;
             height: 25px;
+            font-size: 9px;
         }
 
         .center {
@@ -123,6 +124,7 @@
         .ttd-container {
             width: 100%;
             margin-top: 30px;
+            page-break-inside: avoid;
         }
 
         .ttd-table {
@@ -144,7 +146,28 @@
     <table class="kop-table">
         <tr>
             <td class="kop-logo">
-                <img src="{{ public_path('assets/img/favicon.png') }}" width="60px" height="auto" alt="Logo">
+                <?php
+                // TEKNIK BASE64 AGAR LOGO MUNCUL DI SEMUA ENVIRONMENT
+                // Pastikan path ini benar: public/images/logo.png
+                $path = public_path('images/logo.png');
+                $base64 = '';
+
+                if (file_exists($path)) {
+                    $type = pathinfo($path, PATHINFO_EXTENSION);
+
+                    // PENTING: Gunakan nama variabel '$logoData' (jangan '$data')
+                    // agar tidak menimpa data pasien di bawah
+                    $logoData = file_get_contents($path);
+
+                    $base64 = 'data:image/' . $type . ';base64,' . base64_encode($logoData);
+                }
+                ?>
+
+                @if($base64)
+                <img src="{{ $base64 }}" width="70px" height="auto" alt="Logo">
+                @else
+                <span style="color:red; font-size:10px;">Logo Not Found</span>
+                @endif
             </td>
             <td class="kop-text">
                 <h2>PEMERINTAH KOTA BANJARMASIN</h2>
@@ -160,10 +183,10 @@
     <div class="judul">
         <span class="judul-utama">{{ $judul }}</span>
 
-        {{-- Cek apakah variabel tanggal ada isinya --}}
+        {{-- Logika Periode --}}
         @if(!empty($tgl_awal) && !empty($tgl_akhir))
         <span class="sub-judul">
-            <br> {{-- Tambahkan enter agar turun ke bawah --}}
+            <br>
             Periode Data:
             {{ \Carbon\Carbon::parse($tgl_awal)->translatedFormat('d F Y') }}
             s/d
@@ -177,7 +200,8 @@
         <thead>
             <tr>
                 <th width="3%">No</th>
-                <th width="9%">NIK</th>
+                <th width="10%">No e-RM</th>
+                <th width="10%">NIK</th>
                 <th width="12%">Nama Pasien</th>
                 <th width="3%">JK</th>
                 <th width="9%">Tgl Lahir (Umur)</th>
@@ -188,13 +212,13 @@
                 <th width="7%">Jadwal</th>
                 <th width="8%">Keterangan</th>
                 <th width="9%">Tgl Kontrol</th>
-                <th width="11%">No E-RM</th>
             </tr>
         </thead>
         <tbody>
             @foreach($data as $index => $item)
             <tr>
                 <td class="center">{{ $index + 1 }}</td>
+                <td class="center">{{ $item->no_e_rekam_medis ?? '-' }}</td>
                 <td class="center">{{ $item->nik }}</td>
                 <td class="left">{{ $item->nama }}</td>
                 <td class="center">{{ $item->jenis_kelamin }}</td>
@@ -211,7 +235,6 @@
                 <td class="center">
                     {{ $item->tanggal_kontrol ? \Carbon\Carbon::parse($item->tanggal_kontrol)->format('d-m-Y') : '-' }}
                 </td>
-                <td class="left">{{ $item->no_e_rekam_medis ?? '-' }}</td>
             </tr>
             @endforeach
         </tbody>
@@ -228,7 +251,7 @@
                     <strong>Kepala Puskesmas</strong>
                     <br><br><br><br><br>
                     <strong><u>( .......................................... )</u></strong><br>
-                    NIP. 11..............................
+                    NIP. 19..............................
                 </td>
             </tr>
         </table>

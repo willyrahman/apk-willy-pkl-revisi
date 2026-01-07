@@ -37,7 +37,12 @@
                                 <div class="col-md-6">
                                     <button type="submit" class="btn btn-primary btn-round mr-2">Filter</button>
                                     <a href="{{ route('laporan.ibuHamil') }}" class="btn btn-warning btn-round mr-2">Reset</a>
-                                    <a href="{{ route('laporan.export.pdf', ['jenis' => 'ibuHamil'] + request()->all()) }}" class="btn btn-danger btn-round" target="_blank">PDF</a>
+                                    {{-- BENAR: Menambahkan parameter filter yang sedang aktif ke link PDF --}}
+                                    <a href="{{ route('laporan.export.pdf', ['jenis' => 'ibuHamil'] + request()->all()) }}"
+                                        class="btn btn-danger btn-round"
+                                        target="_blank">
+                                        PDF
+                                    </a>
                                     <a href="{{ route('laporan.export.excel', ['jenis' => 'ibuHamil'] + request()->all()) }}" class="btn btn-success btn-round" target="_blank">Excel</a>
                                 </div>
                             </div>

@@ -8,7 +8,8 @@
     <style>
         body {
             font-family: "Times New Roman", serif;
-            font-size: 12px;
+            font-size: 11px;
+            /* Ukuran font sedikit diperkecil agar muat */
             margin: 0;
             padding: 0;
         }
@@ -63,17 +64,26 @@
 
         .garis-tipis {
             border-top: 1px solid #000;
+            margin-bottom: 10px;
+        }
+
+        /* ===== JUDUL & PERIODE ===== */
+        .judul-container {
+            text-align: center;
             margin-bottom: 15px;
         }
 
-        /* ===== JUDUL ===== */
         .judul {
-            text-align: center;
-            margin-bottom: 15px;
             text-transform: uppercase;
             font-weight: bold;
             font-size: 14px;
             text-decoration: underline;
+            margin-bottom: 5px;
+        }
+
+        .periode {
+            font-size: 12px;
+            font-style: italic;
         }
 
         /* ===== TABEL DATA ===== */
@@ -81,22 +91,24 @@
             width: 100%;
             border-collapse: collapse;
             table-layout: fixed;
+            /* Agar lebar kolom konsisten */
         }
 
         .tabel-data th,
         .tabel-data td {
             border: 1px solid #000;
             padding: 4px;
-            font-size: 11px;
             vertical-align: middle;
             word-wrap: break-word;
+            /* Agar teks panjang turun ke bawah */
         }
 
         .tabel-data th {
             background-color: #f0f0f0;
             text-align: center;
             font-weight: bold;
-            height: 25px;
+            height: 30px;
+            font-size: 11px;
         }
 
         .center {
@@ -111,6 +123,8 @@
         .ttd-container {
             width: 100%;
             margin-top: 30px;
+            page-break-inside: avoid;
+            /* Mencegah TTD terpotong ke halaman baru */
         }
 
         .ttd-table {
@@ -121,7 +135,13 @@
         .ttd-table td {
             border: none;
             text-align: center;
-            font-size: 11px;
+            font-size: 12px;
+        }
+
+        .periode {
+            text-align: center;
+            font-size: 12px;
+            margin-bottom: 10px;
         }
     </style>
 </head>
@@ -132,7 +152,26 @@
     <table class="kop-table">
         <tr>
             <td class="kop-logo">
-                <img src="{{ asset('images/logo.png') }}" width="70px" height="auto">
+                <?php
+                $path = public_path('images/logo.png');
+                $base64 = ''; // Inisialisasi variabel agar tidak error
+
+                if (file_exists($path)) {
+                    $type = pathinfo($path, PATHINFO_EXTENSION);
+
+                    // PERBAIKAN: Ganti nama variabel '$data' menjadi '$imageData'
+                    // Agar tidak menimpa variabel $data utama dari controller
+                    $imageData = file_get_contents($path);
+
+                    $base64 = 'data:image/' . $type . ';base64,' . base64_encode($imageData);
+                }
+                ?>
+
+                @if($base64)
+                <img src="{{ $base64 }}" width="70px" height="auto" alt="Logo">
+                @else
+                <span style="color:red; font-size:10px;">Logo Not Found</span>
+                @endif
             </td>
             <td class="kop-text">
                 <h2>PEMERINTAH KOTA BANJARMASIN</h2>
@@ -144,41 +183,49 @@
     </table>
     <div class="garis-tipis"></div>
 
-    {{-- ================= JUDUL ================= --}}
-    <div class="judul">
-        {{ $judul }}
+    {{-- ================= JUDUL & PERIODE ================= --}}
+    <div class="judul-container">
+        <div class="judul">{{ $judul }}</div>
+
+        {{-- SOLUSI PERIODE: Tampilkan hanya jika variabel tidak kosong --}}
+        @if($tgl_awal != null && $tgl_akhir != null)
+        <div class="periode" style="text-align: center; font-size: 12px; margin-bottom: 10px;">
+            Periode: {{ \Carbon\Carbon::parse($tgl_awal)->translatedFormat('d F Y') }}
+            s/d
+            {{ \Carbon\Carbon::parse($tgl_akhir)->translatedFormat('d F Y') }}
+        </div>
+        @endif
     </div>
 
     {{-- ================= TABEL DATA ================= --}}
     <table class="tabel-data">
         <thead>
             <tr>
-                <th width="5%">No</th>
-                <th width="15%">Nama Ibu</th>
-                <th width="10%">Tgl Lahir</th>
-                <th width="12%">NIK</th>
-                <th width="12%">Nama Suami</th>
-                <th width="20%">Alamat</th>
+                <th width="4%">No</th>
+                <th width="10%">No e-RM</th>
                 <th width="10%">Tgl Periksa K6</th>
+                <th width="15%">Nama Ibu Hamil</th>
+                <th width="10%">Tgl Lahir</th>
+                <th width="11%">NIK</th>
+                <th width="12%">Nama Suami</th>
+                <th width="18%">Alamat</th>
                 <th width="10%">Jaminan</th>
-                <th width="15%">No E Rekam Medis</th>
             </tr>
         </thead>
         <tbody>
             @foreach($data as $index => $item)
             <tr>
                 <td class="center">{{ $index + 1 }}</td>
+                <td class="center">{{ $item->no_e_rekam_medis ?? '-' }}</td>
+                <td class="center">
+                    {{ $item->tgl_pemeriksaan_k6 ? \Carbon\Carbon::parse($item->tgl_pemeriksaan_k6)->format('d-m-Y') : '-' }}
+                </td>
                 <td class="left">{{ $item->nama_ibu }}</td>
                 <td class="center">{{ \Carbon\Carbon::parse($item->tanggal_lahir)->format('d-m-Y') }}</td>
                 <td class="center">{{ $item->nik }}</td>
                 <td class="left">{{ $item->nama_suami }}</td>
                 <td class="left">{{ $item->alamat }}</td>
-                <td class="center">
-                    {{-- Cek jika tanggal ada --}}
-                    {{ $item->tgl_pemeriksaan_k6 ? \Carbon\Carbon::parse($item->tgl_pemeriksaan_k6)->format('d-m-Y') : '-' }}
-                </td>
                 <td class="center">{{ $item->jaminan_kesehatan }}</td>
-                <td class="left">{{ $item->no_e_rekam_medis ?? '-' }}</td>
             </tr>
             @endforeach
         </tbody>
