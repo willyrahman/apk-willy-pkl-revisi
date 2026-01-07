@@ -10,7 +10,10 @@ class BalitaController extends Controller
 {
     public function index()
     {
+        // Ambil data balita beserta data ibunya (eager loading)
         $balitas = Balita::with('ibuHamil')->orderBy('tgl_pemeriksaan', 'desc')->get();
+
+        // Ambil semua data ibu hamil untuk dropdown
         $data_ibu = IbuHamil::orderBy('nama_ibu', 'asc')->get();
 
         return view('data_balita', compact('balitas', 'data_ibu'));
@@ -18,49 +21,38 @@ class BalitaController extends Controller
 
     public function store(Request $request)
     {
-        // 1. VALIDASI DIPERBAIKI (Nullable untuk data yang tidak wajib)
-        $validated = $request->validate([
-            'ibu_hamil_id' => 'required|exists:ibu_hamils,id',
-            'no_e_rekam_medis' => 'nullable',
-            'nama_pasien' => 'required',
-            'nik' => 'required|numeric',
-            'jenis_kelamin' => 'required',
-            'tgl_pemeriksaan' => 'required|date',
-            'umur' => 'required', // Bisa string "2 Tahun 3 Bulan" atau integer
-            'alamat' => 'nullable', // Diubah jadi nullable
-
-            // Fisik
-            'berat_badan' => 'required|numeric',
-            'tinggi_badan' => 'required|numeric',
-            'suhu' => 'nullable|numeric', // Diubah jadi nullable
-
-            // Medis (Nullable semua agar tidak error jika kosong)
-            'keluhan_utama' => 'nullable',
-            'diagnosa_1' => 'nullable',
-            'icd_x_1' => 'nullable',
-            'obat' => 'nullable',
-            'apoteker' => 'nullable',
-            'dokter_tenaga_medis' => 'nullable',
-            'poli_ruangan' => 'nullable',
+        $request->validate([
+            'ibu_hamil_id'        => 'required|exists:ibu_hamils,id',
+            'no_e_rekam_medis'    => 'nullable|string',
+            'nama_pasien'         => 'required|string',
+            'nik'                 => 'required|numeric',
+            'jenis_kelamin'       => 'required|in:L,P',
+            'umur'                => 'required',
+            'tgl_pemeriksaan'     => 'required|date',
+            'alamat'              => 'required',
+            'poli_ruangan'        => 'required',
+            'dokter_tenaga_medis' => 'required',
+            'berat_badan'         => 'required|numeric',
+            'tinggi_badan'        => 'required|numeric',
+            'suhu'                => 'nullable|numeric',
+            'keluhan_utama'       => 'nullable|string',
+            'diagnosa_1'          => 'nullable|string',
+            'icd_x_1'             => 'nullable|string',
+            'obat'                => 'nullable|string',
+            'apoteker'            => 'nullable|string',
         ]);
 
         try {
-            // 2. HITUNG IMT & STATUS GIZI (LENGKAP DENGAN TEXT)
-            $hasilImt = $this->hitungIMT($request->berat_badan, $request->tinggi_badan);
-
-            // Masukkan hasil hitungan ke array data
             $data = $request->all();
-            $data['hasil_imt_status_gizi'] = $hasilImt;
 
-            // 3. SIMPAN KE DATABASE
+            // Hitung IMT & Status Gizi (Sinkron dengan JS)
+            $data['hasil_imt_status_gizi'] = $this->hitungIMT($request->berat_badan, $request->tinggi_badan);
+
             Balita::create($data);
 
-            return redirect()->route('balita.index')->with('success', 'Data Balita berhasil ditambahkan!');
+            return redirect()->route('balita.index')->with('success', 'Data Balita berhasil disimpan!');
         } catch (\Exception $e) {
-            // Tampilkan error spesifik jika gagal
-            return redirect()->back()
-                ->withInput() // Kembalikan inputan user agar tidak mengetik ulang
-                ->with('error', 'Gagal menyimpan: ' . $e->getMessage());
+            return redirect()->back()->withInput()->with('error', 'Gagal menyimpan data: ' . $e->getMessage());
         }
     }
 
@@ -68,27 +60,39 @@ class BalitaController extends Controller
     {
         $balita = Balita::findOrFail($id);
 
+        // Validasi disesuaikan dengan semua inputan di modal Edit
         $request->validate([
-            'ibu_hamil_id' => 'required',
-            'nama_pasien' => 'required',
-            'nik' => 'required|numeric',
-            'berat_badan' => 'nullable|numeric',
-            'tinggi_badan' => 'nullable|numeric',
+            'ibu_hamil_id'        => 'required|exists:ibu_hamils,id',
+            'no_e_rekam_medis'    => 'nullable|string',
+            'nama_pasien'         => 'required|string',
+            'nik'                 => 'required|numeric',
+            'jenis_kelamin'       => 'required|in:L,P',
+            'umur'                => 'required',
+            'tgl_pemeriksaan'     => 'required|date',
+            'alamat'              => 'required',
+            'poli_ruangan'        => 'required',
+            'dokter_tenaga_medis' => 'required',
+            'berat_badan'         => 'required|numeric',
+            'tinggi_badan'        => 'required|numeric',
+            'suhu'                => 'nullable|numeric',
+            'keluhan_utama'       => 'nullable|string',
+            'diagnosa_1'          => 'nullable|string',
+            'icd_x_1'             => 'nullable|string',
+            'obat'                => 'nullable|string',
+            'apoteker'            => 'nullable|string',
         ]);
 
         try {
             $data = $request->all();
 
-            // Hitung ulang IMT jika berat/tinggi diubah
-            if ($request->filled('berat_badan') && $request->filled('tinggi_badan')) {
-                $data['hasil_imt_status_gizi'] = $this->hitungIMT($request->berat_badan, $request->tinggi_badan);
-            }
+            // Hitung ulang IMT jika ada perubahan berat atau tinggi
+            $data['hasil_imt_status_gizi'] = $this->hitungIMT($request->berat_badan, $request->tinggi_badan);
 
             $balita->update($data);
 
             return redirect()->route('balita.index')->with('success', 'Data Balita berhasil diperbarui!');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal update: ' . $e->getMessage());
+            return redirect()->back()->withInput()->with('error', 'Gagal memperbarui data: ' . $e->getMessage());
         }
     }
 
@@ -98,33 +102,31 @@ class BalitaController extends Controller
             Balita::findOrFail($id)->delete();
             return redirect()->route('balita.index')->with('success', 'Data Balita berhasil dihapus!');
         } catch (\Exception $e) {
-            return redirect()->route('balita.index')->with('error', 'Gagal hapus: ' . $e->getMessage());
+            return redirect()->route('balita.index')->with('error', 'Gagal menghapus data.');
         }
     }
 
     /**
-     * Helper: Hitung IMT Lengkap dengan Status
-     * Format Output: "16.5 (Gizi Baik)"
+     * Helper untuk menghitung IMT dan Status Gizi
+     * Output: "22.50 (Gizi Baik)"
      */
     private function hitungIMT($berat, $tinggi)
     {
         if ($berat > 0 && $tinggi > 0) {
             $tinggiMeter = $tinggi / 100;
             $imt = $berat / ($tinggiMeter * $tinggiMeter);
-            $imtFormatted = number_format($imt, 2, '.', '');
 
-            // Logika Status Gizi (Standar WHO Sederhana)
-            $status = "";
+            $status = '';
             if ($imt < 18.5) {
-                $status = "Gizi Kurang";
+                $status = 'Gizi Kurang';
             } elseif ($imt >= 18.5 && $imt <= 25) {
-                $status = "Gizi Baik";
+                $status = 'Gizi Baik';
             } else {
-                $status = "Gizi Lebih";
+                $status = 'Gizi Lebih';
             }
 
-            return "$imtFormatted ($status)";
+            return number_format($imt, 2) . ' (' . $status . ')';
         }
-        return "0 (Tidak Diketahui)";
+        return '-';
     }
 }

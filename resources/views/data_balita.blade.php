@@ -110,30 +110,32 @@
         <div class="main-panel">
             @include('navbar')
             <div class="content">
+
+                @if ($errors->any())
+                <div class="alert alert-danger alert-dismissible fade show">
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <strong>Input Gagal!</strong> Periksa field berikut:
+                    <ul>
+                        @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+                @endif
+
+                @if(session('error'))
+                <div class="alert alert-danger alert-dismissible fade show">
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    {{ session('error') }}
+                </div>
+                @endif
+
                 <div class="row">
                     <div class="col-md-12">
-                        @if ($errors->any())
-                        <div class="alert alert-danger alert-dismissible fade show">
-                            <button type="button" aria-hidden="true" class="close" data-dismiss="alert" aria-label="Close">
-                                <i class="nc-icon nc-simple-remove"></i>
-                            </button>
-                            <span>
-                                <b> Gagal Menyimpan Data - Cek Kesalahan Berikut: </b>
-                                <ul>
-                                    @foreach ($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                    @endforeach
-                                </ul>
-                            </span>
-                        </div>
-                        @endif
-
-                        @if(session('error'))
-                        <div class="alert alert-danger">
-                            <span><b>Error Database:</b> {{ session('error') }}</span>
-                        </div>
-                        @endif
-                        {{-- === BATAS KODE === --}}
                         <div class="card">
                             <div class="card-header d-flex justify-content-between align-items-center">
                                 <h4 class="card-title">Data Pemeriksaan Balita</h4>
@@ -327,20 +329,10 @@
                             </div>
                         </div>
                         <div class="form-group"><label>Alamat</label><textarea name="alamat" class="form-control" rows="2"></textarea></div>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Poli / Ruangan</label>
-                                    <input type="text" name="poli_ruangan" class="form-control" placeholder="Contoh: Poli Anak">
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Dokter / Tenaga Medis</label>
-                                    <input type="text" name="dokter_tenaga_medis" class="form-control" placeholder="Nama Dokter/Bidan">
-                                </div>
-                            </div>
-                        </div>
+                        <div class="form-group"><label>Poli</label><input type="text" name="poli_ruangan" class="form-control" required></div>
+
+                        <div class="form-group"><label>Dokter</label><input type="text" name="dokter_tenaga_medis" class="form-control" required></div>
+
                         <div class="row bg-light p-2 mx-1 mb-3 border rounded">
                             <div class="col-md-3">
                                 <div class="form-group"><label>Berat (Kg)</label><input type="number" step="0.1" name="berat_badan" id="add_berat" class="form-control" oninput="calcIMT('add')" required></div>
@@ -623,7 +615,6 @@
             $('#det_obat').text($(this).data('obat') || '-');
             $('#det_apoteker').text($(this).data('apoteker') || '-');
 
-            // Logika Badge Status Gizi
             var imtStatus = $(this).data('imt');
             var badgeClass = 'badge-secondary';
             if (imtStatus.includes('Baik')) badgeClass = 'badge-success';
@@ -695,14 +686,6 @@
                 }
             });
         }
-
-        @if(session('success'))
-        Swal.fire({
-            icon: 'success',
-            title: 'Berhasil',
-            text: "{{ session('success') }}"
-        });
-        @endif
     </script>
 </body>
 
