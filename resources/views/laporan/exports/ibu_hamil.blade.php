@@ -99,9 +99,11 @@
             <td colspan="9" style="border-top: 2.5pt solid #000; border-left:none; border-right:none; border-bottom:none; height: 5px;"></td>
         </tr>
 
-        {{-- ================= JUDUL LAPORAN ================= --}}
+        {{-- ================= JUDUL LAPORAN (PERBAIKAN) ================= --}}
         <tr>
-            <td colspan="9" style="text-align: center; font-size: 13pt; font-weight: bold; text-decoration: underline; border:none; height: 30px; vertical-align: middle;">
+            <td colspan="1" style="border:none;"></td>
+
+            <td colspan="8" style="text-align: center; font-size: 13pt; font-weight: bold; text-decoration: underline; border:none; height: 30px; vertical-align: middle;">
                 {{ strtoupper($judul ?? 'LAPORAN DATA IBU HAMIL') }}
             </td>
         </tr>

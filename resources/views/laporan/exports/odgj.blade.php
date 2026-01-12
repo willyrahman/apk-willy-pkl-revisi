@@ -122,8 +122,10 @@
 
         {{-- ================= JUDUL (PERBAIKAN RATA TENGAH) ================= --}}
         <tr>
-            <td colspan="12" style="text-align: center; font-size: 13pt; font-weight: bold; text-decoration: underline; border:none; height: 30px; vertical-align: middle;">
-                {{ strtoupper($judul ?? 'LAPORAN DATA PASIEN ODGJ') }}
+            <td colspan="2" style="border:none;"></td>
+
+            <td colspan="10" style="text-align: center; font-size: 13pt; font-weight: bold; text-decoration: underline; border:none; height: 30px; vertical-align: middle;">
+                {{ strtoupper($judul ?? 'LAPORAN DATA ODGJ') }}
             </td>
         </tr>
 

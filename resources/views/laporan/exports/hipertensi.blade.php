@@ -97,9 +97,11 @@
             <td colspan="15" style="border-top: 2.5pt solid #000; border-left:none; border-right:none; border-bottom:none; height: 5px;"></td>
         </tr>
 
-        {{-- ================= JUDUL ================= --}}
+        {{-- ================= JUDUL (SEJAJAR TEKS KOP) ================= --}}
         <tr>
-            <td colspan="15" style="text-align: center; font-size: 13pt; font-weight: bold; text-decoration: underline; border:none; height: 30px; vertical-align: middle;">
+            <td colspan="2" style="border:none;"></td>
+
+            <td colspan="13" style="text-align: center; font-size: 13pt; font-weight: bold; text-decoration: underline; border:none; height: 30px; vertical-align: middle;">
                 {{ strtoupper($judul ?? 'LAPORAN DATA PASIEN HIPERTENSI') }}
             </td>
         </tr>

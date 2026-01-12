@@ -87,9 +87,11 @@
             <td colspan="16" style="border-top: 2.5pt solid #000; border-left:none; border-right:none; border-bottom:none; height: 5px;"></td>
         </tr>
 
-        {{-- ================= JUDUL LAPORAN ================= --}}
+        {{-- ================= JUDUL LAPORAN (PERBAIKAN) ================= --}}
         <tr>
-            <td colspan="16" style="text-align: center; font-size: 13pt; font-weight: bold; text-decoration: underline; border:none; height: 30px; vertical-align: middle;">
+            <td colspan="2" style="border:none;"></td>
+
+            <td colspan="14" style="text-align: center; font-size: 13pt; font-weight: bold; text-decoration: underline; border:none; height: 30px; vertical-align: middle;">
                 {{ strtoupper($judul ?? 'LAPORAN DATA PEMERIKSAAN BALITA') }}
             </td>
         </tr>
@@ -97,7 +99,8 @@
         {{-- Baris Periode (Jika Ada) --}}
         @if(isset($tgl_awal) && isset($tgl_akhir))
         <tr>
-            <td colspan="16" style="text-align: center; font-size: 11pt; font-style: italic; border:none;">
+            <td colspan="2" style="border:none;"></td>
+            <td colspan="14" style="text-align: center; font-size: 11pt; font-style: italic; border:none;">
                 Periode: {{ \Carbon\Carbon::parse($tgl_awal)->translatedFormat('d F Y') }} s/d {{ \Carbon\Carbon::parse($tgl_akhir)->translatedFormat('d F Y') }}
             </td>
         </tr>
