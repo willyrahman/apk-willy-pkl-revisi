@@ -76,17 +76,22 @@ class LaporanController extends Controller
     // --- FITUR EXPORT EXCEL ---
     public function exportExcel(Request $request, $jenis)
     {
+        // 1. Inisialisasi variabel awal
         $data = [];
         $view = '';
-        $judul = ''; // Tambahkan variabel judul untuk Excel
+        $judul = '';
+        $tgl_awal = $request->tgl_awal;
+        $tgl_akhir = $request->tgl_akhir;
 
+        // 2. Logika pengambilan data berdasarkan jenis laporan
         switch ($jenis) {
             case 'ibuHamil':
                 $query = IbuHamil::query();
                 if ($request->filled('tgl_awal') && $request->filled('tgl_akhir')) {
-                    $query->whereBetween('created_at', [$request->tgl_awal, $request->tgl_akhir]);
+                    // Menggunakan tgl_pemeriksaan_k6 agar konsisten dengan filter PDF
+                    $query->whereBetween('tgl_pemeriksaan_k6', [$tgl_awal, $tgl_akhir]);
                 }
-                $data = $query->orderBy('created_at', 'desc')->get();
+                $data = $query->orderBy('tgl_pemeriksaan_k6', 'desc')->get();
                 $view = 'laporan.exports.ibu_hamil';
                 $judul = 'LAPORAN DATA IBU HAMIL';
                 break;
@@ -94,9 +99,10 @@ class LaporanController extends Controller
             case 'odgj':
                 $query = Odgj::query();
                 if ($request->filled('tgl_awal') && $request->filled('tgl_akhir')) {
-                    $query->whereBetween('created_at', [$request->tgl_awal, $request->tgl_akhir]);
+                    // Menggunakan tanggal_kontrol sesuai filter halaman web
+                    $query->whereBetween('tanggal_kontrol', [$tgl_awal, $tgl_akhir]);
                 }
-                $data = $query->orderBy('created_at', 'desc')->get();
+                $data = $query->orderBy('tanggal_kontrol', 'desc')->get();
                 $view = 'laporan.exports.odgj';
                 $judul = 'LAPORAN DATA ODGJ';
                 break;
@@ -104,7 +110,7 @@ class LaporanController extends Controller
             case 'hipertensi':
                 $query = Hipertensi::query();
                 if ($request->filled('tgl_awal') && $request->filled('tgl_akhir')) {
-                    $query->whereBetween('tanggal', [$request->tgl_awal, $request->tgl_akhir]);
+                    $query->whereBetween('tanggal', [$tgl_awal, $tgl_akhir]);
                 }
                 $data = $query->orderBy('tanggal', 'desc')->get();
                 $view = 'laporan.exports.hipertensi';
@@ -114,7 +120,7 @@ class LaporanController extends Controller
             case 'balita':
                 $query = Balita::with('ibuHamil');
                 if ($request->filled('tgl_awal') && $request->filled('tgl_akhir')) {
-                    $query->whereBetween('tgl_pemeriksaan', [$request->tgl_awal, $request->tgl_akhir]);
+                    $query->whereBetween('tgl_pemeriksaan', [$tgl_awal, $tgl_akhir]);
                 }
                 $data = $query->orderBy('tgl_pemeriksaan', 'desc')->get();
                 $view = 'laporan.exports.balita';
@@ -124,7 +130,7 @@ class LaporanController extends Controller
             case 'lansia':
                 $query = Lansia::with('hipertensi');
                 if ($request->filled('tgl_awal') && $request->filled('tgl_akhir')) {
-                    $query->whereBetween('tanggal_kunjungan', [$request->tgl_awal, $request->tgl_akhir]);
+                    $query->whereBetween('tanggal_kunjungan', [$tgl_awal, $tgl_akhir]);
                 }
                 $data = $query->orderBy('tanggal_kunjungan', 'desc')->get();
                 $view = 'laporan.exports.lansia';
@@ -135,14 +141,17 @@ class LaporanController extends Controller
                 return redirect()->back()->with('error', 'Jenis laporan tidak ditemukan.');
         }
 
-        // PENTING: Bersihkan buffer output sebelum download agar file tidak corrupt
+        // 3. Persiapan pengunduhan file
+        // Bersihkan buffer output agar file tidak corrupt
         if (ob_get_length()) ob_end_clean();
 
+        // Atur header untuk format Excel (.xls)
         header("Content-type: application/vnd-ms-excel");
         header("Content-Disposition: attachment; filename=Laporan_{$jenis}_" . date('Y-m-d') . ".xls");
 
-        // Kirim $judul ke view excel juga
-        return view($view, compact('data', 'judul'));
+        // 4. Return view dengan variabel yang lengkap (termasuk tanggal untuk header laporan)
+        // Di dalam method exportExcel LaporanController
+        return view($view, compact('data', 'judul', 'tgl_awal', 'tgl_akhir', 'jenis'));
     }
 
     // --- FITUR EXPORT PDF ---

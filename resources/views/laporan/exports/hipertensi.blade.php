@@ -1,106 +1,178 @@
-<table>
-    {{-- ================= KOP SURAT (TEKS SAJA) ================= --}}
-    <thead>
+<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+    <meta http-equiv="Content-type" content="text/html;charset=utf-8" />
+    <style>
+        body,
+        table,
+        td,
+        th {
+            font-family: "Times New Roman", serif;
+        }
+
+        table {
+            border-collapse: collapse;
+        }
+
+        .center {
+            text-align: center;
+        }
+
+        .bold {
+            font-weight: bold;
+        }
+
+        /* Pengaturan format kolom agar NIK/No Asuransi tidak menjadi scientific notation */
+        .text-format {
+            mso-number-format: "\@";
+        }
+
+        /* Lebar Kolom (Opsional, menyesuaikan kebutuhan data Hipertensi) */
+        .col-no {
+            width: 30pt;
+        }
+
+        .col-tgl {
+            width: 80pt;
+        }
+
+        .col-nama {
+            width: 150pt;
+        }
+
+        .col-nik {
+            width: 130pt;
+        }
+
+        .col-asuransi {
+            width: 130pt;
+        }
+
+        .col-jk {
+            width: 40pt;
+        }
+
+        .col-alamat {
+            width: 200pt;
+        }
+    </style>
+</head>
+
+<body>
+    {{-- Menambahkan border="1" agar garis muncul di Excel --}}
+    <table border="1" style="border-collapse: collapse;">
+
+        {{-- ================= KOP SURAT ================= --}}
         <tr>
-            {{-- KOLOM LOGO (Merge 2 Kolom) --}}
-            <td colspan="2" rowspan="4" style="text-align: center; vertical-align: middle;">
-                {{-- Pastikan file 'logo.png' ada di public/images/ --}}
-                {{-- Kita gunakan asset() agar path-nya absolut (http://localhost/...) --}}
-                <img src="{{ asset('images/logo.png') }}" width="70" height="70" style="vertical-align: middle;">
+            <td colspan="2" rowspan="4" style="text-align: center; vertical-align: middle; border:none;">
+                @php $logo = public_path('images/logo.png'); @endphp
+                @if(file_exists($logo))
+                <img src="{{ $logo }}" width="70" height="80">
+                @else
+                {{-- Fallback jika file tidak ditemukan --}}
+                @endif
             </td>
-            <td colspan="14" style="text-align: center; font-weight: bold; font-size: 14px;">
+            <td colspan="13" style="text-align: center; font-size: 16pt; font-weight: bold; border:none;">
                 PEMERINTAH KOTA BANJARMASIN
             </td>
         </tr>
         <tr>
-            <td colspan="14" style="text-align: center; font-weight: bold; font-size: 12px;">
+            <td colspan="13" style="text-align: center; font-size: 14pt; font-weight: bold; border:none;">
                 DINAS KESEHATAN PUSKESMAS PEKAPURAN LAUT
             </td>
         </tr>
         <tr>
-            <td colspan="14" style="text-align: center; font-size: 10px; font-style: italic;">
+            <td colspan="13" style="text-align: center; font-size: 10pt; font-style: italic; border:none;">
                 Jl. Pekapuran B Laut, Kel. Pekapuran Laut, Kec. Banjarmasin Tengah
             </td>
         </tr>
         <tr>
-            <td colspan="14" style="text-align: center; font-size: 10px; font-style: italic;">
-                Kota Banjarmasin, Kalimantan Selatan. Telp: (0511) 123456
+            <td colspan="13" style="text-align: center; font-size: 10pt; font-style: italic; border:none;">
+                Kota Banjarmasin, Kalimantan Selatan. Telp. (0511) 123456
             </td>
         </tr>
 
-        <tr></tr> {{-- Spasi Kosong --}}
-
-        {{-- JUDUL LAPORAN --}}
+        {{-- GARIS KOP --}}
         <tr>
-            <td colspan="14" style="text-align: center; font-weight: bold; font-size: 12px; text-transform: uppercase;">
-                LAPORAN DATA PASIEN HIPERTENSI
+            <td colspan="15" style="border-top: 2.5pt solid #000; border-left:none; border-right:none; border-bottom:none; height: 5px;"></td>
+        </tr>
+
+        {{-- ================= JUDUL ================= --}}
+        <tr>
+            <td colspan="15" style="text-align: center; font-size: 13pt; font-weight: bold; text-decoration: underline; border:none; height: 30px; vertical-align: middle;">
+                {{ strtoupper($judul ?? 'LAPORAN DATA PASIEN HIPERTENSI') }}
             </td>
         </tr>
 
-        <tr></tr> {{-- Spasi Kosong --}}
-
-        {{-- HEADER TABEL --}}
+        {{-- Baris Periode (Jika Ada) --}}
+        @if(isset($tgl_awal) && isset($tgl_akhir))
         <tr>
-            <th style="font-weight: bold; border: 1px solid #000000; text-align: center; background-color: #f0f0f0;">No</th>
-            <th style="font-weight: bold; border: 1px solid #000000; text-align: center; background-color: #f0f0f0;">Tanggal</th>
-            <th style="font-weight: bold; border: 1px solid #000000; text-align: center; background-color: #f0f0f0;">Nama Pasien</th>
-            <th style="font-weight: bold; border: 1px solid #000000; text-align: center; background-color: #f0f0f0;">NIK</th>
-            <th style="font-weight: bold; border: 1px solid #000000; text-align: center; background-color: #f0f0f0;">No Asuransi</th>
-            <th style="font-weight: bold; border: 1px solid #000000; text-align: center; background-color: #f0f0f0;">JK</th>
-            <th style="font-weight: bold; border: 1px solid #000000; text-align: center; background-color: #f0f0f0;">No Telp</th>
-            <th style="font-weight: bold; border: 1px solid #000000; text-align: center; background-color: #f0f0f0;">Alamat</th>
-            <th style="font-weight: bold; border: 1px solid #000000; text-align: center; background-color: #f0f0f0;">RT</th>
-            <th style="font-weight: bold; border: 1px solid #000000; text-align: center; background-color: #f0f0f0;">RW</th>
-            <th style="font-weight: bold; border: 1px solid #000000; text-align: center; background-color: #f0f0f0;">Skala Nyeri</th>
-            <th style="font-weight: bold; border: 1px solid #000000; text-align: center; background-color: #f0f0f0;">ICD-X</th>
-            <th style="font-weight: bold; border: 1px solid #000000; text-align: center; background-color: #f0f0f0;">Diagnosa</th>
-            <th style="font-weight: bold; border: 1px solid #000000; text-align: center; background-color: #f0f0f0;">Jenis Kasus</th>
-            <th style="font-weight: bold; border: 1px solid #000000; text-align: center; background-color: #f0f0f0;">No E Rekam Medis</th>
+            <td colspan="15" style="text-align: center; font-size: 11pt; font-style: italic; border:none;">
+                Periode: {{ \Carbon\Carbon::parse($tgl_awal)->translatedFormat('d F Y') }} s/d {{ \Carbon\Carbon::parse($tgl_akhir)->translatedFormat('d F Y') }}
+            </td>
         </tr>
-    </thead>
+        @endif
 
-    {{-- ISI DATA --}}
-    <tbody>
-        @foreach($data as $index => $item)
+        {{-- Spasi Kosong Sebelum Tabel --}}
         <tr>
-            <td style="border: 1px solid #000000; text-align: center;">{{ $index + 1 }}</td>
-            <td style="border: 1px solid #000000; text-align: center;">{{ \Carbon\Carbon::parse($item->tanggal)->format('d-m-Y') }}</td>
-            <td style="border: 1px solid #000000;">{{ $item->nama_pasien }}</td>
+            <td colspan="15" style="border:none; height: 10px;"></td>
+        </tr>
 
-            {{-- Tambahkan tanda kutip ' agar dibaca sebagai teks di Excel --}}
-            <td style="border: 1px solid #000000; text-align: center;">'{{ $item->nik }}</td>
-            <td style="border: 1px solid #000000; text-align: center;">'{{ $item->no_asuransi }}</td>
+        {{-- ================= HEADER TABEL ================= --}}
+        <tr style="background-color: #d9d9d9;">
+            <th class="col-no" style="border: 1pt solid #000; font-weight: bold; text-align: center;">No</th>
+            <th class="col-tgl" style="border: 1pt solid #000; font-weight: bold; text-align: center;">Tanggal</th>
+            <th class="col-nama" style="border: 1pt solid #000; font-weight: bold; text-align: center;">Nama Pasien</th>
+            <th class="col-nik" style="border: 1pt solid #000; font-weight: bold; text-align: center;">NIK</th>
+            <th class="col-asuransi" style="border: 1pt solid #000; font-weight: bold; text-align: center;">No Asuransi</th>
+            <th class="col-jk" style="border: 1pt solid #000; font-weight: bold; text-align: center;">JK</th>
+            <th style="border: 1pt solid #000; font-weight: bold; text-align: center;">No Telp</th>
+            <th class="col-alamat" style="border: 1pt solid #000; font-weight: bold; text-align: center;">Alamat</th>
+            <th style="border: 1pt solid #000; font-weight: bold; text-align: center;">RT</th>
+            <th style="border: 1pt solid #000; font-weight: bold; text-align: center;">RW</th>
+            <th style="border: 1pt solid #000; font-weight: bold; text-align: center;">Nyeri</th>
+            <th style="border: 1pt solid #000; font-weight: bold; text-align: center;">ICD-X</th>
+            <th style="border: 1pt solid #000; font-weight: bold; text-align: center;">Diagnosa</th>
+            <th style="border: 1pt solid #000; font-weight: bold; text-align: center;">Kasus</th>
+            <th style="border: 1pt solid #000; font-weight: bold; text-align: center;">No e-RM</th>
+        </tr>
 
-            <td style="border: 1px solid #000000; text-align: center;">{{ $item->jenis_kelamin }}</td>
-            <td style="border: 1px solid #000000; text-align: center;">'{{ $item->no_telp }}</td>
-            <td style="border: 1px solid #000000;">{{ $item->alamat }}</td>
-            <td style="border: 1px solid #000000; text-align: center;">{{ $item->rt }}</td>
-            <td style="border: 1px solid #000000; text-align: center;">{{ $item->rw }}</td>
-            <td style="border: 1px solid #000000; text-align: center;">{{ $item->skala_nyeri }}</td>
-            <td style="border: 1px solid #000000; text-align: center;">{{ $item->icd_x_1 }}</td>
-            <td style="border: 1px solid #000000;">{{ $item->diagnosa_1 }}</td>
-            <td style="border: 1px solid #000000; text-align: center;">{{ $item->jenis_kasus_1 }}</td>
-            <td style="border: 1px solid #000000;">{{ $item->no_e_rekam_medis ?? '-' }}</td>
+        {{-- ================= ISI DATA ================= --}}
+        @foreach($data as $i => $item)
+        <tr>
+            <td class="center" style="border: 1pt solid #000;">{{ $i+1 }}</td>
+            <td class="center" style="border: 1pt solid #000;">{{ \Carbon\Carbon::parse($item->tanggal)->format('d-m-Y') }}</td>
+            <td style="border: 1pt solid #000;">{{ $item->nama_pasien }}</td>
+            <td class="center text-format" style="border: 1pt solid #000;">'{{ $item->nik }}</td>
+            <td class="center text-format" style="border: 1pt solid #000;">'{{ $item->no_asuransi }}</td>
+            <td class="center" style="border: 1pt solid #000;">{{ $item->jenis_kelamin }}</td>
+            <td class="center text-format" style="border: 1pt solid #000;">'{{ $item->no_telp }}</td>
+            <td style="border: 1pt solid #000;">{{ $item->alamat }}</td>
+            <td class="center" style="border: 1pt solid #000;">{{ $item->rt }}</td>
+            <td class="center" style="border: 1pt solid #000;">{{ $item->rw }}</td>
+            <td class="center" style="border: 1pt solid #000;">{{ $item->skala_nyeri }}</td>
+            <td class="center" style="border: 1pt solid #000;">{{ $item->icd_x_1 }}</td>
+            <td style="border: 1pt solid #000;">{{ $item->diagnosa_1 }}</td>
+            <td class="center" style="border: 1pt solid #000;">{{ $item->jenis_kasus_1 }}</td>
+            <td style="border: 1pt solid #000;">{{ $item->no_e_rekam_medis ?? '-' }}</td>
         </tr>
         @endforeach
-    </tbody>
 
-    {{-- TANDA TANGAN --}}
-    <tr></tr>
-    <tr></tr>
+        {{-- ================= TANDA TANGAN ================= --}}
+        <tr>
+            <td colspan="15" style="border:none; height: 30px;"></td>
+        </tr>
+        <tr>
+            <td colspan="11" style="border:none;"></td>
+            <td colspan="4" class="center" style="border:none;">
+                Banjarmasin, {{ now()->translatedFormat('d F Y') }}<br>
+                Mengetahui,<br>
+                <span class="bold">Kepala Puskesmas</span><br><br><br><br><br>
+                <span class="bold"><u>( .................................. )</u></span><br>
+                NIP. 19............................
+            </td>
+        </tr>
+    </table>
+</body>
 
-    <tr>
-        {{-- Kosongkan kolom kiri --}}
-        <td colspan="10"></td>
-
-        {{-- Area Tanda Tangan --}}
-        <td colspan="4" style="text-align: center;">
-            Banjarmasin, {{ now()->translatedFormat('d F Y') }} <br>
-            Mengetahui, <br>
-            <strong>Kepala Puskesmas</strong>
-            <br><br><br><br>
-            <strong><u>( .......................................... )</u></strong><br>
-            NIP. 19..............................
-        </td>
-    </tr>
-</table>
+</html>
